@@ -122,29 +122,46 @@ const pageNums = Array.from({ length: page.lastPage }, (_, i) => i + 1);
 
 <script>
   // 客户端排序：对当前页的行按日期/字数重排，并同步行首编号。
-  // 注意：静态分页下排序只作用于当前页（demo 阶段够用，文章多了需改为构建期方案）。
+  // 排序状态放 URL（?sort=words）：翻页链接携带参数，新页加载时恢复，
+  // 可分享、可后退。注意：静态分页下排序只作用于当前页（demo 阶段够用，
+  // 文章多了需改为构建期方案）。
   const bar = document.querySelector<HTMLElement>('.sort-bar');
   const list = document.querySelector<HTMLElement>('.posts-list');
+
+  const applySort = (key: 'date' | 'words', push: boolean) => {
+    if (!bar || !list) return;
+    bar.querySelectorAll('.sort-btn').forEach((b) => {
+      const active = b instanceof HTMLElement && b.dataset.sort === key;
+      b.classList.toggle('is-active', active);
+      b.setAttribute('aria-pressed', String(active));
+    });
+    const rows = Array.from(list.children) as HTMLElement[];
+    rows.sort(
+      (a, b) => Number(b.dataset[key] ?? 0) - Number(a.dataset[key] ?? 0),
+    );
+    rows.forEach((row, i) => {
+      list.appendChild(row);
+      const no = row.querySelector('.post-row-no');
+      if (no) no.textContent = String(i + 1).padStart(2, '0');
+    });
+    // 同步 URL 与翻页链接
+    const param = key === 'words' ? '?sort=words' : '';
+    if (push) history.replaceState(null, '', location.pathname + param);
+    document.querySelectorAll<HTMLAnchorElement>('a.pager-btn').forEach((a) => {
+      const path = a.getAttribute('href')?.split('?')[0];
+      if (path) a.setAttribute('href', path + param);
+    });
+  };
+
   if (bar && list) {
     bar.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest<HTMLElement>('.sort-btn');
       if (!btn) return;
-      bar.querySelectorAll('.sort-btn').forEach((b) => {
-        const active = b === btn;
-        b.classList.toggle('is-active', active);
-        b.setAttribute('aria-pressed', String(active));
-      });
-      const key = btn.dataset.sort === 'words' ? 'words' : 'date';
-      const rows = Array.from(list.children) as HTMLElement[];
-      rows.sort(
-        (a, b) => Number(b.dataset[key] ?? 0) - Number(a.dataset[key] ?? 0),
-      );
-      rows.forEach((row, i) => {
-        list.appendChild(row);
-        const no = row.querySelector('.post-row-no');
-        if (no) no.textContent = String(i + 1).padStart(2, '0');
-      });
+      applySort(btn.dataset.sort === 'words' ? 'words' : 'date', true);
     });
+    // 从 URL 恢复排序状态
+    const saved = new URLSearchParams(location.search).get('sort');
+    if (saved === 'words') applySort('words', false);
   }
 </script>
 
