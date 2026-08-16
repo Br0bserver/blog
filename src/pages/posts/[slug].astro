@@ -299,8 +299,6 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     box-shadow: 8px 8px 0 0 var(--shadow-c);
     padding: 32px;
     min-width: 0;
-    max-width: none;
-    transition: max-width 0.3s cubic-bezier(0.2, 0, 0, 1);
   }
 
   .post-header {
@@ -371,7 +369,9 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
   @media (min-width: 900px) {
     .post-layout {
       grid-template-columns: 300px minmax(0, 1fr);
-      transition: grid-template-columns 0.3s cubic-bezier(0.2, 0, 0, 1);
+      transition:
+        grid-template-columns 0.3s cubic-bezier(0.2, 0, 0, 1),
+        gap 0.3s cubic-bezier(0.2, 0, 0, 1);
     }
 
     .post-top {
@@ -380,16 +380,13 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
 
     :global(html[data-post-side='closed']) .post-layout {
       grid-template-columns: 0px minmax(0, 1fr);
+      gap: 0;
     }
 
     :global(html[data-post-side='closed']) .post-side {
       opacity: 0;
-    }
-
-    /* 收起后正文卡随 720px 排版宽收窄（720 + 内边距 64 + 边框 8），
-       避免卡内右侧空出一大块 */
-    :global(html[data-post-side='closed']) .post-main {
-      max-width: 792px;
+      visibility: hidden;
+      pointer-events: none;
     }
 
     .pn-section {
