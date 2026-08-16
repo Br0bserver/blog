@@ -7,8 +7,8 @@ export async function getStaticPaths({ paginate }) {
   const posts = (await getCollection('blog')).sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );
-  // 每页篇数：12 篇占位内容下取 5，翻出 3 页方便检验分页
-  return paginate(posts, { pageSize: 5 });
+  // 每页篇数：常规博客分页尺寸
+  return paginate(posts, { pageSize: 10 });
 }
 
 // 字数占位：接入真实统计前先固定演示值
@@ -54,10 +54,6 @@ const pageNums = Array.from({ length: page.lastPage }, (_, i) => i + 1);
         <span class="total-no">{total}</span>
       </div>
     </header>
-
-    <div class="sec-divider" aria-hidden="true">
-      <div class="sec-divider-label tilt-pos">SEC_01</div>
-    </div>
 
     <!-- 排序：日期 / 字数 -->
     <div class="sort-bar" role="group" aria-label="排序方式">
