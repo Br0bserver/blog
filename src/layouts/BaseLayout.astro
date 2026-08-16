@@ -1,0 +1,49 @@
+---
+import TopNav from '../components/TopNav.astro';
+import Footer from '../components/Footer.astro';
+import BackgroundLayer from '../components/BackgroundLayer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'SWISS BRUTALIST GRID — 瑞士秩序 × 粗野骨架的博客实验',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('theme');
+        document.documentElement.dataset.theme =
+          saved ??
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800;900&family=IBM+Plex+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <BackgroundLayer />
+    <TopNav />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

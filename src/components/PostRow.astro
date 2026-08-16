@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../lib/format';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  index: number;
+}
+
+const { post, index } = Astro.props;
+const no = String(index).padStart(2, '0');
+const tag = post.data.tags[0]?.toUpperCase() ?? 'POST';
+---
+
+<a href={`/posts/${post.id}/`} class="post-row">
+  <div class="post-row-no">{no}</div>
+  <div class="post-row-main">
+    <div class="post-row-title">{post.data.title}</div>
+    <div class="post-row-meta">
+      <span class="post-row-tag">{tag}</span>
+      <time datetime={post.data.pubDate.toISOString()}>
+        {formatDate(post.data.pubDate)}
+      </time>
+    </div>
+  </div>
+</a>
+
+<style>
+  .post-row-main {
+    min-width: 0;
+  }
+</style>

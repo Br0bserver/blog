@@ -1,0 +1,157 @@
+---
+const navItems = [
+  { href: '/', label: 'HOME' },
+  { href: '/posts', label: 'POSTS' },
+  { href: '/about', label: 'ABOUT' },
+];
+
+const currentPath = Astro.url.pathname;
+const normalize = (p: string) => (p.endsWith('/') && p !== '/' ? p.slice(0, -1) : p);
+const isActive = (href: string) =>
+  href === '/' ? currentPath === '/' : normalize(currentPath).startsWith(href);
+---
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="topnav-terminal" aria-hidden="true"></div>
+    <a class="nav-logo" href="/" aria-label="BRUTALIST_BLOG — 返回首页">
+      BRUTALIST_BLOG
+    </a>
+
+    <div class="nav-links">
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={['nav-link', { active: isActive(item.href) }]}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <button
+      id="theme-toggle"
+      class="theme-toggle"
+      type="button"
+      aria-label="切换浅色 / 深色模式"
+      title="切换浅色 / 深色模式"
+    >
+      <svg
+        class="icon-moon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg
+        class="icon-sun"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<script>
+  const root = document.documentElement;
+
+  interface ViewTransitionLike {
+    ready: Promise<void>;
+    finished: Promise<void>;
+  }
+
+  let wiping = false;
+
+  document.getElementById('theme-toggle')?.addEventListener('click', (e) => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    const toggle = e.currentTarget as HTMLElement;
+
+    const apply = () => {
+      root.dataset.theme = next;
+      localStorage.setItem('theme', next);
+    };
+
+    const startVT = (
+      document as Document & {
+        startViewTransition?: (cb: () => void) => ViewTransitionLike;
+      }
+    ).startViewTransition;
+
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !startVT) {
+      // 不支持 VT 的浏览器：靠 @property 令牌过渡平滑变色
+      apply();
+      return;
+    }
+
+    if (wiping) return; // 上一次圆形扩散未结束，忽略连点
+    wiping = true;
+
+    // VT 快照会冻结颜色过渡的起始帧，切换瞬间先停用令牌过渡，
+    // 让圆形边界展开的即是最终配色
+    root.style.transition = 'none';
+    const vt = startVT(apply);
+
+    vt.ready
+      .then(() => {
+        const rect = toggle.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        // 圆半径 = 按钮中心到视口最远角的距离，保证完整覆盖
+        const radius = Math.hypot(
+          Math.max(cx, window.innerWidth - cx),
+          Math.max(cy, window.innerHeight - cy),
+        );
+
+        root.animate(
+          {
+            clipPath: [
+              `circle(0px at ${cx}px ${cy}px)`,
+              `circle(${radius}px at ${cx}px ${cy}px)`,
+            ],
+          },
+          {
+            duration: 450,
+            easing: 'ease-in-out',
+            pseudoElement: '::view-transition-new(root)',
+          },
+        );
+      })
+      .catch(() => {});
+
+    vt.finished.finally(() => {
+      root.style.removeProperty('transition');
+      wiping = false;
+    });
+  });
+
+  // 用户手动选择过（localStorage 有值）之前，实时跟随系统亮暗变化
+  // （系统触发的切换只走 @property 平滑过渡，不播圆形扩散）
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+      root.dataset.theme = e.matches ? 'dark' : 'light';
+    }
+  });
+</script>

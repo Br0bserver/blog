@@ -1,0 +1,23 @@
+---
+/**
+ * 背景技术层：巨字 / 点阵 / 12列虚线网格 / 边缘标签
+ * 全部 pointer-events:none，纯装饰
+ */
+const edgeText = 'EST. 2026 — SWISS_BRUTAL_DIARY';
+---
+
+<div class="bg-layer" aria-hidden="true">
+  <div class="bg-words">
+    <span class="w1">SWISS</span>
+    <span class="w2">BRUTAL</span>
+    <span class="w3">2026</span>
+  </div>
+</div>
+
+<div class="bg-grid-dots" aria-hidden="true">
+  <div class="bg-cols">
+    {Array.from({ length: 12 }).map(() => <div></div>)}
+  </div>
+</div>
+
+<div class="edge-label" aria-hidden="true">{edgeText}</div>
