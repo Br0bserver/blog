@@ -120,8 +120,10 @@ const isActive = (href: string) =>
     wiping = true;
 
     // VT 快照会冻结颜色过渡的起始帧，切换瞬间先停用令牌过渡，
-    // 让圆形边界展开的即是最终配色
+    // 让圆形边界展开的即是最终配色；.vt-theme 同时限定全局的
+    // 快照压制规则只作用于主题切换，不波及跨页转场
     root.style.transition = 'none';
+    root.classList.add('vt-theme');
 
     let cleaned = false;
     let failsafe = 0;
@@ -142,6 +144,7 @@ const isActive = (href: string) =>
       clearTimeout(failsafe);
       clearTimeout(forceTimer);
       root.style.removeProperty('transition');
+      root.classList.remove('vt-theme');
       wiping = false;
     };
     failsafe = window.setTimeout(cleanup, 1000);

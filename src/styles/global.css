@@ -825,18 +825,20 @@ h1, h2, h3, h4 {
   margin: 2.5em 0;
 }
 
-/* ---------- 主题切换：圆形扩散（View Transition） ---------- */
-::view-transition-old(root),
-::view-transition-new(root) {
+/* ---------- 主题切换：圆形扩散（同文档 View Transition） ---------- */
+/* 压制默认交叉淡入的规则必须限定在 .vt-theme 下（由切换脚本挂上/摘除），
+   否则同样会压制跨页导航转场的快照动画 */
+:root.vt-theme::view-transition-old(root),
+:root.vt-theme::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-::view-transition-old(root) {
+:root.vt-theme::view-transition-old(root) {
   z-index: 1;
 }
 
-::view-transition-new(root) {
+:root.vt-theme::view-transition-new(root) {
   z-index: 2;
 }
 
