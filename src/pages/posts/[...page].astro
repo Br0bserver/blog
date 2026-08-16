@@ -1,0 +1,318 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostRow from '../../components/PostRow.astro';
+
+export async function getStaticPaths({ paginate }) {
+  const posts = (await getCollection('blog')).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  );
+  // 每页篇数：12 篇占位内容下取 5，翻出 3 页方便检验分页
+  return paginate(posts, { pageSize: 5 });
+}
+
+// 字数占位：接入真实统计前先固定演示值
+const wordsPlaceholder: Record<string, number> = {
+  'grid-is-the-soul': 1204,
+  'hard-shadow-geometry': 892,
+  'dark-mode-done-right': 2150,
+  'typography-as-infrastructure': 1020,
+  'border-as-structure': 760,
+  'mono-font-discipline': 645,
+  'red-is-the-only-accent': 930,
+  'paper-texture-notes': 510,
+  'view-transition-falls': 1480,
+  'raf-parallax-lesson': 875,
+  'sticker-grammar': 690,
+  'static-first': 1120,
+};
+
+const { page } = Astro.props;
+const total = String(page.total).padStart(3, '0');
+const pageNums = Array.from({ length: page.lastPage }, (_, i) => i + 1);
+---
+
+<BaseLayout title="POSTS — INDEX">
+  <div class="page">
+    <div class="measure-ruler" aria-hidden="true">
+      <span>0mm</span>
+      <span>1240px</span>
+    </div>
+
+    <!-- 页头 -->
+    <header class="posts-head">
+      <div class="posts-head-main">
+        <span class="posts-chip">01 / POSTS</span>
+        <h1 class="posts-title">INDEX</h1>
+        <p class="posts-desc">
+          A complete index of thoughts on design systems, grid discipline, and
+          neo-brutalist raw energy.
+        </p>
+      </div>
+      <div class="total-box" aria-label={`共 ${page.total} 篇文章`}>
+        <span class="total-label">TOTAL ARTICLES</span>
+        <span class="total-no">{total}</span>
+      </div>
+    </header>
+
+    <div class="sec-divider" aria-hidden="true">
+      <div class="sec-divider-label tilt-pos">SEC_01</div>
+    </div>
+
+    <!-- 排序：日期 / 字数 -->
+    <div class="sort-bar" role="group" aria-label="排序方式">
+      <span class="sort-label">SORT:</span>
+      <button class="sort-btn is-active" data-sort="date" aria-pressed="true">
+        DATE
+      </button>
+      <button class="sort-btn" data-sort="words" aria-pressed="false">
+        WORD COUNT
+      </button>
+    </div>
+
+    <section class="posts-list">
+      {
+        page.data.map((post, i) => (
+          <PostRow
+            post={post}
+            index={i + 1}
+            allTags
+            words={wordsPlaceholder[post.id] ?? 0}
+          />
+        ))
+      }
+    </section>
+
+    <!-- 分页 -->
+    <nav class="pager" aria-label="分页">
+      {
+        page.url.prev ? (
+          <a class="pager-btn" href={page.url.prev}>
+            PREV
+          </a>
+        ) : (
+          <span class="pager-btn is-disabled" aria-disabled="true">
+            PREV
+          </span>
+        )
+      }
+      {
+        pageNums.map((n) =>
+          n === page.currentPage ? (
+            <span class="pager-btn is-active" aria-current="page">
+              {String(n).padStart(2, '0')}
+            </span>
+          ) : (
+            <a class="pager-btn" href={n === 1 ? '/posts' : `/posts/${n}`}>
+              {String(n).padStart(2, '0')}
+            </a>
+          ),
+        )
+      }
+      {
+        page.url.next ? (
+          <a class="pager-btn" href={page.url.next}>
+            NEXT
+          </a>
+        ) : (
+          <span class="pager-btn is-disabled" aria-disabled="true">
+            NEXT
+          </span>
+        )
+      }
+    </nav>
+  </div>
+</BaseLayout>
+
+<script>
+  // 客户端排序：对当前页的行按日期/字数重排，并同步行首编号。
+  // 注意：静态分页下排序只作用于当前页（demo 阶段够用，文章多了需改为构建期方案）。
+  const bar = document.querySelector<HTMLElement>('.sort-bar');
+  const list = document.querySelector<HTMLElement>('.posts-list');
+  if (bar && list) {
+    bar.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLElement>('.sort-btn');
+      if (!btn) return;
+      bar.querySelectorAll('.sort-btn').forEach((b) => {
+        const active = b === btn;
+        b.classList.toggle('is-active', active);
+        b.setAttribute('aria-pressed', String(active));
+      });
+      const key = btn.dataset.sort === 'words' ? 'words' : 'date';
+      const rows = Array.from(list.children) as HTMLElement[];
+      rows.sort(
+        (a, b) => Number(b.dataset[key] ?? 0) - Number(a.dataset[key] ?? 0),
+      );
+      rows.forEach((row, i) => {
+        list.appendChild(row);
+        const no = row.querySelector('.post-row-no');
+        if (no) no.textContent = String(i + 1).padStart(2, '0');
+      });
+    });
+  }
+</script>
+
+<style>
+  .posts-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gutter);
+    align-items: end;
+    margin-bottom: 64px;
+  }
+
+  .posts-head-main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .posts-chip {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--on-ink);
+    background: var(--ink);
+    padding: 2px 12px;
+    width: max-content;
+  }
+
+  .posts-title {
+    font-size: clamp(56px, 9vw, 96px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    overflow-wrap: break-words;
+  }
+
+  .posts-desc {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--meta);
+    max-width: 560px;
+    border-left: 4px solid var(--red);
+    padding-left: 16px;
+  }
+
+  .total-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 200px;
+    padding: 24px 32px;
+    color: var(--on-ink);
+    background: var(--ink);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--red);
+  }
+
+  .total-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--red);
+  }
+
+  .total-no {
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .sort-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .sort-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--meta);
+    margin-right: 8px;
+  }
+
+  .sort-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .sort-btn:hover {
+    background: var(--red);
+    color: var(--on-red);
+  }
+
+  .sort-btn.is-active {
+    background: var(--ink);
+    color: var(--on-ink);
+  }
+
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 96px;
+  }
+
+  .pager-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    padding: 8px 16px;
+    min-width: 40px;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  a.pager-btn:hover {
+    background: var(--red);
+    color: var(--on-red);
+  }
+
+  .pager-btn.is-active {
+    background: var(--ink);
+    color: var(--on-ink);
+  }
+
+  .pager-btn.is-disabled {
+    opacity: 0.3;
+  }
+
+  @media (min-width: 768px) {
+    .posts-head {
+      grid-template-columns: 1fr auto;
+    }
+  }
+</style>

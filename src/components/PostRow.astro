@@ -19,7 +19,12 @@ const tags = (allTags ? post.data.tags : post.data.tags.slice(0, 1)).map((t) =>
 const fallbackTag = tags.length ? tags : ['POST'];
 ---
 
-<a href={`/posts/${post.id}/`} class="post-row">
+<a
+  href={`/posts/${post.id}/`}
+  class="post-row"
+  data-date={post.data.pubDate.valueOf()}
+  data-words={words ?? 0}
+>
   <div class="post-row-no">{no}</div>
   <div class="post-row-main">
     <div class="post-row-title">{post.data.title}</div>
