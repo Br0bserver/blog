@@ -227,6 +227,25 @@ h1, h2, h3, h4 {
 .bg-words .w2 { top: 46%; left: 50%; transform: translate(-50%, -50%) rotate(-8deg); }
 .bg-words .w3 { top: 90%; right: -5%; }
 
+/* 视差：巨字层比内容滚动更慢（≈0.78x）制造纵深；
+   点阵/12列网格与内容锁定 1:1（坐标纸不参与视差）；
+   不支持滚动时间线的浏览器自动退回 1:1 */
+@supports (animation-timeline: scroll()) {
+  .bg-words {
+    animation: bg-words-drift linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@keyframes bg-words-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(36vh);
+  }
+}
+
 .bg-grid-dots {
   position: absolute; /* 跟随文档滚动，与前景一起移动 */
   inset: 0;
