@@ -568,21 +568,6 @@ h1, h2, h3, h4 {
   border: var(--border-w) solid var(--ink);
 }
 
-/* 区块幽灵数字 */
-.ghost-no {
-  position: absolute;
-  left: -80px;
-  top: 0;
-  font-size: 240px;
-  font-weight: 900;
-  color: var(--faint);
-  opacity: 0.5;
-  line-height: 1;
-  user-select: none;
-  pointer-events: none;
-  z-index: -1;
-}
-
 /* ==========================================================================
    文章行
    ========================================================================== */
