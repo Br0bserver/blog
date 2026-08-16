@@ -293,6 +293,13 @@ const latest = posts.slice(0, 3);
     display: none;
   }
 
+  /* 暗色下墨色即浅灰，纯墨衬底会变成亮板（夹心饼干）：
+     衬底归入阴影家族，随 --shadow-c 一起走 */
+  :global([data-theme='dark']) .sysinfo-backdrop {
+    background: var(--shadow-c);
+    border-color: var(--shadow-c);
+  }
+
   .sysinfo-grid {
     position: relative;
     z-index: 1;
