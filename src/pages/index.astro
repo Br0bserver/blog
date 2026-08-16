@@ -277,27 +277,28 @@ const latest = posts.slice(0, 3);
   }
 
   /* ---------- SYSTEM_INFO ---------- */
+  /* SEC_02 的衬底与硬影统一走专属变量：比边框墨色浅一档。
+     亮色 = 七成墨（与暗色 --shadow-c 同比例），暗色 = --shadow-c。
+     避免亮色下整块纯黑衬底 / 暗色下整块纯墨亮板 */
   .sysinfo {
+    --sec02-slab: #575653;
     position: relative;
     z-index: 1;
     margin-top: 32px;
   }
 
+  :global([data-theme='dark']) .sysinfo {
+    --sec02-slab: var(--shadow-c);
+  }
+
   .sysinfo-backdrop {
     position: absolute;
     inset: 0;
-    background: var(--ink);
-    border: var(--border-w) solid var(--ink);
+    background: var(--sec02-slab);
+    border: var(--border-w) solid var(--sec02-slab);
     transform: translate(16px, 16px);
     z-index: 0;
     display: none;
-  }
-
-  /* 暗色下墨色即浅灰，纯墨衬底会变成亮板（夹心饼干）：
-     衬底归入阴影家族，随 --shadow-c 一起走 */
-  :global([data-theme='dark']) .sysinfo-backdrop {
-    background: var(--shadow-c);
-    border-color: var(--shadow-c);
   }
 
   .sysinfo-grid {
@@ -307,7 +308,7 @@ const latest = posts.slice(0, 3);
     grid-template-columns: 1fr;
     background: var(--surface);
     border: var(--border-w) solid var(--ink);
-    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    box-shadow: 8px 8px 0 0 var(--sec02-slab);
   }
 
   .sysinfo-stats {
