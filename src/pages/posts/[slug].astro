@@ -1,7 +1,7 @@
 ---
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { sortedPosts } from '../../lib/posts';
+import { sortedPosts, wordsPlaceholder } from '../../lib/posts';
 import { formatDate } from '../../lib/format';
 
 export async function getStaticPaths() {
@@ -88,28 +88,54 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
       </article>
     </div>
 
-    <!-- 上一篇 / 下一篇 -->
+    <!-- 上一篇 / 下一篇：完全复刻列表页的 post-row -->
     <section class="pn-section" aria-label="相邻文章">
       {prev ? (
-        <a class="pn-card" href={`/posts/${prev.id}/`}>
-          <span class="pn-label">‹ PREVIOUS POST</span>
-          <span class="pn-title">{prev.data.title}</span>
+        <a class="post-row" href={`/posts/${prev.id}/`}>
+          <div class="post-row-no">‹</div>
+          <div class="post-row-main">
+            <div class="post-row-title">{prev.data.title}</div>
+            <div class="post-row-meta">
+              <span class="post-row-tag">PREV</span>
+              <time datetime={prev.data.pubDate.toISOString()}>
+                {formatDate(prev.data.pubDate)}
+              </time>
+              <span class="post-row-words">
+                {(wordsPlaceholder[prev.id] ?? 0).toLocaleString('en-US')} 字
+              </span>
+            </div>
+          </div>
         </a>
       ) : (
-        <div class="pn-card is-empty">
-          <span class="pn-label">‹ PREVIOUS POST</span>
-          <span class="pn-title">NO MORE POSTS</span>
+        <div class="post-row pn-empty">
+          <div class="post-row-no">‹</div>
+          <div class="post-row-main">
+            <div class="post-row-title">NO MORE POSTS</div>
+          </div>
         </div>
       )}
       {next ? (
-        <a class="pn-card pn-next" href={`/posts/${next.id}/`}>
-          <span class="pn-label">NEXT POST ›</span>
-          <span class="pn-title">{next.data.title}</span>
+        <a class="post-row" href={`/posts/${next.id}/`}>
+          <div class="post-row-no">›</div>
+          <div class="post-row-main">
+            <div class="post-row-title">{next.data.title}</div>
+            <div class="post-row-meta">
+              <span class="post-row-tag">NEXT</span>
+              <time datetime={next.data.pubDate.toISOString()}>
+                {formatDate(next.data.pubDate)}
+              </time>
+              <span class="post-row-words">
+                {(wordsPlaceholder[next.id] ?? 0).toLocaleString('en-US')} 字
+              </span>
+            </div>
+          </div>
         </a>
       ) : (
-        <div class="pn-card is-empty pn-next">
-          <span class="pn-label">NEXT POST ›</span>
-          <span class="pn-title">NO MORE POSTS</span>
+        <div class="post-row pn-empty">
+          <div class="post-row-no">›</div>
+          <div class="post-row-main">
+            <div class="post-row-title">NO MORE POSTS</div>
+          </div>
         </div>
       )}
     </section>
@@ -144,8 +170,8 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
 
   .post-top {
     display: flex;
-    justify-content: flex-start;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 16px;
     margin-bottom: 32px;
   }
@@ -385,8 +411,8 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     color: var(--meta);
   }
 
-  /* ---------- 上一篇 / 下一篇：与文章行同一交互语言
-     （hover 整卡反白 + 红条滑入） ---------- */
+  /* ---------- 上一篇 / 下一篇：卡片直接用全局 .post-row，
+     此处只管区块容器与空态 ---------- */
   .pn-section {
     display: grid;
     grid-template-columns: 1fr;
@@ -395,81 +421,9 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     padding-top: 48px;
   }
 
-  .pn-card {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 16px;
-    min-height: 150px;
-    padding: 24px;
-    background: var(--surface);
-    border: var(--border-w) solid var(--ink);
-    box-shadow: 8px 8px 0 0 var(--red);
-    text-decoration: none;
-    transition: background 0.15s ease;
-  }
-
-  .pn-label {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    color: var(--meta);
-    position: relative;
-    z-index: 2;
-    transition: color 0.15s ease;
-  }
-
-  .pn-title {
-    font-size: 20px;
-    font-weight: 800;
-    line-height: 1.3;
-    color: var(--ink);
-    position: relative;
-    z-index: 2;
-    transition: color 0.15s ease;
-  }
-
-  .pn-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 16px;
-    background: var(--red);
-    transform: translateX(-101%);
-    transition: transform 0.15s ease;
-    z-index: 1;
-  }
-
-  a.pn-card:hover {
-    background: var(--ink);
-  }
-
-  a.pn-card:hover .pn-title,
-  a.pn-card:hover .pn-label {
-    color: var(--on-ink);
-  }
-
-  a.pn-card:hover::before {
-    transform: translateX(0);
-  }
-
-  .pn-card.is-empty {
+  .pn-empty {
     opacity: 0.35;
     box-shadow: none;
-  }
-
-  .pn-next {
-    text-align: right;
-  }
-
-  .pn-next::before {
-    left: auto;
-    right: 0;
-    transform: translateX(101%);
   }
 
   /* ---------- 桌面端：侧栏列 + 收起 ---------- */
