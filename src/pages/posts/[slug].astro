@@ -40,17 +40,13 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
           <span class="back-arrow" aria-hidden="true">‹</span>
           BACK TO POSTS
         </a>
-        <button id="side-toggle-bar" class="side-toggle side-toggle-bar" type="button" aria-expanded="false" aria-controls="post-side">
+        <button id="side-toggle" class="side-toggle" type="button" aria-expanded="true" aria-controls="post-side">
           <span class="side-arrow" aria-hidden="true"></span>
           META
         </button>
       </div>
 
       <aside class="post-side" id="post-side">
-        <button id="side-toggle-side" class="side-toggle side-toggle-side" type="button" aria-expanded="true" aria-controls="post-side">
-          META
-          <span class="side-arrow" aria-hidden="true"></span>
-        </button>
         <div class="meta-card">
           <div class="meta-row">
             <span class="meta-label">PUBLISHED</span>
@@ -121,8 +117,7 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
 </BaseLayout>
 
 <script>
-  // 侧栏收起：状态挂 html[data-post-side]，localStorage 持久化。
-  // 两个按钮（侧栏内的 + 收起后顶栏的）同步绑定
+  // 侧栏收起：状态挂 html[data-post-side]，localStorage 持久化
   const buttons = document.querySelectorAll('.side-toggle');
   const sync = (closed: boolean) =>
     buttons.forEach((b) => b.setAttribute('aria-expanded', String(!closed)));
@@ -149,8 +144,9 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
 
   .post-top {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    gap: 16px;
     margin-bottom: 32px;
   }
 
@@ -207,20 +203,6 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
 
   :global(html[data-post-side='closed']) .side-arrow::after {
     content: '›';
-  }
-
-  /* 侧栏内的按钮占满侧栏宽；顶栏按钮只在收起后出现 */
-  .side-toggle-side {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .side-toggle-bar {
-    display: none;
-  }
-
-  :global(html[data-post-side='closed']) .side-toggle-bar {
-    display: flex;
   }
 
   /* ---------- 侧栏 ---------- */
@@ -424,7 +406,7 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     padding: 24px;
     background: var(--surface);
     border: var(--border-w) solid var(--ink);
-    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    box-shadow: 8px 8px 0 0 var(--red);
     text-decoration: none;
     transition: background 0.15s ease;
   }
