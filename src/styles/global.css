@@ -851,22 +851,45 @@ h1, h2, h3, h4 {
   z-index: 9999;
   background: var(--ink);
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 [data-theme='dark'] .nav-slab {
   background: var(--shadow-c);
 }
 
+/* 挡板上的目的地巨字：描边无填充，随挡板反向微漂制造纵深 */
+.nav-slab .slab-word {
+  font-family: var(--font-display);
+  font-size: clamp(80px, 18vw, 240px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 3px var(--bg);
+}
+
 /* 进入 posts（链接在右）：自右向左揭开，挡板左滑出场，红沿在前 */
 html[data-nav='cover-right'] .nav-slab {
   border-left: 4px solid var(--red);
-  animation: slab-exit-left 320ms cubic-bezier(0.2, 0, 0, 1) forwards;
+  animation: slab-exit-left 480ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+html[data-nav='cover-right'] .slab-word {
+  animation: word-drift-right 480ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 /* 返回首页（链接在左）：自左向右揭开，挡板右滑出场 */
 html[data-nav='cover-left'] .nav-slab {
   border-right: 4px solid var(--red);
-  animation: slab-exit-right 320ms cubic-bezier(0.2, 0, 0, 1) forwards;
+  animation: slab-exit-right 480ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+html[data-nav='cover-left'] .slab-word {
+  animation: word-drift-left 480ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 @keyframes slab-exit-left {
@@ -879,9 +902,19 @@ html[data-nav='cover-left'] .nav-slab {
   to { transform: translateX(102%); }
 }
 
+@keyframes word-drift-right {
+  from { transform: translateX(-8%); }
+  to { transform: translateX(4%); }
+}
+
+@keyframes word-drift-left {
+  from { transform: translateX(8%); }
+  to { transform: translateX(-4%); }
+}
+
 /* posts 翻页：页头/分页条为原生首帧，仅列表自下方补位 */
 html[data-nav='pager'] .posts-list {
-  animation: card-in 280ms cubic-bezier(0.2, 0, 0, 1) backwards;
+  animation: card-in 330ms cubic-bezier(0.2, 0, 0, 1) backwards;
 }
 
 @keyframes card-in {

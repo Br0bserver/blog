@@ -30,18 +30,25 @@ const {
           saved ??
           (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       })();
-      // 导航转场标记：上一页的点击监听写入（cover-left/cover-right/pager），
-      // 读出后挂到 html 供 CSS 选择器使用并注入挡板，读完即清。
-      // 直接打开/刷新没有标记 → 不播动画
+      // 导航转场标记：上一页的点击监听写入（cover-left/cover-right/pager，
+      // 管线符后带目的地标签），读出后挂到 html 供 CSS 选择器使用并注入
+      // 挡板，读完即清。直接打开/刷新没有标记 → 不播动画
       (function () {
         var nav = sessionStorage.getItem('nav-anim');
         if (!nav) return;
         sessionStorage.removeItem('nav-anim');
-        document.documentElement.dataset.nav = nav;
-        if (nav.indexOf('cover') === 0) {
+        var parts = nav.split('|');
+        var mode = parts[0];
+        var label = parts[1];
+        document.documentElement.dataset.nav = mode;
+        if (mode.indexOf('cover') === 0) {
           var slab = document.createElement('div');
           slab.className = 'nav-slab';
           slab.setAttribute('aria-hidden', 'true');
+          var word = document.createElement('span');
+          word.className = 'slab-word';
+          word.textContent = label || '';
+          slab.appendChild(word);
           document.documentElement.appendChild(slab);
         }
       })();
@@ -63,7 +70,8 @@ const {
     <script>
       // ---------- 导航转场 ----------
       // 点击监听：只记意图，不拦截导航。站内链接 → 根据目标定方向：
-      // 回首页从左揭，其余从右揭；分页条链接 → pager（列表补位）
+      // 回首页从左揭，其余从右揭；分页条链接 → pager（列表补位）。
+      // 携带目的地标签（取路径首段大写）供挡板巨字使用
       document.addEventListener(
         'click',
         (e) => {
@@ -73,12 +81,15 @@ const {
           if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
           const href = a.getAttribute('href') ?? '';
           if (href.startsWith('//')) return;
-          const mode = a.closest('.pager')
-            ? 'pager'
-            : href === '/' || href.startsWith('/?')
-              ? 'cover-left'
-              : 'cover-right';
-          sessionStorage.setItem('nav-anim', mode);
+          if (a.closest('.pager')) {
+            sessionStorage.setItem('nav-anim', 'pager');
+            return;
+          }
+          const seg = href.split('/')[1]?.toUpperCase() ?? '';
+          const label = seg || 'HOME';
+          const mode =
+            href === '/' || href.startsWith('/?') ? 'cover-left' : 'cover-right';
+          sessionStorage.setItem('nav-anim', mode + '|' + label);
         },
         true,
       );
