@@ -30,12 +30,21 @@ const {
           saved ??
           (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       })();
-      // 跨页转场模式标记：上一页的分页条点击时写入，此处读出供 CSS
-      // 选择器使用（翻页=列表抽卡，否则=整页推进），读完即清
-      if (sessionStorage.getItem('vt-mode') === 'pager') {
-        document.documentElement.dataset.vt = 'pager';
-        sessionStorage.removeItem('vt-mode');
-      }
+      // 导航转场标记：上一页的点击监听写入（cover-left/cover-right/pager），
+      // 读出后挂到 html 供 CSS 选择器使用并注入挡板，读完即清。
+      // 直接打开/刷新没有标记 → 不播动画
+      (function () {
+        var nav = sessionStorage.getItem('nav-anim');
+        if (!nav) return;
+        sessionStorage.removeItem('nav-anim');
+        document.documentElement.dataset.nav = nav;
+        if (nav.indexOf('cover') === 0) {
+          var slab = document.createElement('div');
+          slab.className = 'nav-slab';
+          slab.setAttribute('aria-hidden', 'true');
+          document.documentElement.appendChild(slab);
+        }
+      })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -51,5 +60,43 @@ const {
       <slot />
     </main>
     <Footer />
+    <script>
+      // ---------- 导航转场 ----------
+      // 点击监听：只记意图，不拦截导航。站内链接 → 根据目标定方向：
+      // 回首页从左揭，其余从右揭；分页条链接 → pager（列表补位）
+      document.addEventListener(
+        'click',
+        (e) => {
+          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
+            return;
+          const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="/"]');
+          if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+          const href = a.getAttribute('href') ?? '';
+          if (href.startsWith('//')) return;
+          const mode = a.closest('.pager')
+            ? 'pager'
+            : href === '/' || href.startsWith('/?')
+              ? 'cover-left'
+              : 'cover-right';
+          sessionStorage.setItem('nav-anim', mode);
+        },
+        true,
+      );
+
+      // 收尾：入场动画结束后摘除标记与挡板；超时兜底，bfcache 恢复时强制清理
+      const finish = () => {
+        document.documentElement.removeAttribute('data-nav');
+        document.querySelector('.nav-slab')?.remove();
+      };
+      const slab = document.querySelector<HTMLElement>('.nav-slab');
+      const animated = slab ?? document.querySelector('.posts-list');
+      if (document.documentElement.dataset.nav && animated) {
+        animated.addEventListener('animationend', finish, { once: true });
+        setTimeout(finish, 1500);
+      }
+      window.addEventListener('pageshow', (e) => {
+        if (e.persisted) finish();
+      });
+    </script>
   </body>
 </html>

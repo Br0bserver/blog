@@ -102,36 +102,6 @@ const latest = posts.slice(0, 3);
   </div>
 </BaseLayout>
 
-<style is:global>
-  /* ---------- 跨页转场（本页定义返回首页的动画） ---------- */
-  /* 进入首页：新页从左侧（HOME 链接一侧）硬边盖入，旧页被同步裁走 */
-  ::view-transition-old(root) {
-    animation: 320ms cubic-bezier(0.2, 0, 0, 1) both vt-exit-to-right;
-  }
-
-  ::view-transition-new(root) {
-    animation: 320ms cubic-bezier(0.2, 0, 0, 1) both vt-enter-left;
-  }
-
-  /* posts 页的命名组快照随同一道前沿被裁走，避免浮在推进层之上 */
-  ::view-transition-old(posts-head),
-  ::view-transition-old(sort-bar),
-  ::view-transition-old(pager),
-  ::view-transition-old(postlist) {
-    animation: 320ms cubic-bezier(0.2, 0, 0, 1) both vt-exit-to-right;
-  }
-
-  @keyframes vt-enter-left {
-    from { clip-path: inset(0 100% 0 0); }
-    to { clip-path: inset(0 0 0 0); }
-  }
-
-  @keyframes vt-exit-to-right {
-    from { clip-path: inset(0 0 0 0); }
-    to { clip-path: inset(0 0 0 100%); }
-  }
-</style>
-
 <style>
   /* ---------- ISSUE 贴纸 ---------- */
   .issue-sticker {

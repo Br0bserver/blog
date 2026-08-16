@@ -842,13 +842,53 @@ h1, h2, h3, h4 {
   z-index: 2;
 }
 
-/* ---------- 跨页导航转场 ---------- */
-/* 同源导航自动获得 View Transition（不支持则瞬切）；
-   具体动作在各页面 is:global 样式块定义：
-   - 进入页 = 硬边推进（新页从目标链接一侧盖入）
-   - posts 翻页 = 仅列表抽卡，页头/分页条原地不动 */
-@view-transition {
-  navigation: auto;
+/* ---------- 页面导航转场（纯 CSS 挡板，不依赖 View Transition） ---------- */
+/* 新页首帧由挡板完全覆盖，再向目标对侧滑开揭出；
+   挡板由 BaseLayout 头部脚本按 sessionStorage 标记注入 */
+.nav-slab {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--ink);
+  pointer-events: none;
+}
+
+[data-theme='dark'] .nav-slab {
+  background: var(--shadow-c);
+}
+
+/* 进入 posts（链接在右）：自右向左揭开，挡板左滑出场，红沿在前 */
+html[data-nav='cover-right'] .nav-slab {
+  border-left: 4px solid var(--red);
+  animation: slab-exit-left 320ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+/* 返回首页（链接在左）：自左向右揭开，挡板右滑出场 */
+html[data-nav='cover-left'] .nav-slab {
+  border-right: 4px solid var(--red);
+  animation: slab-exit-right 320ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes slab-exit-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-102%); }
+}
+
+@keyframes slab-exit-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(102%); }
+}
+
+/* posts 翻页：页头/分页条为原生首帧，仅列表自下方补位 */
+html[data-nav='pager'] .posts-list {
+  animation: card-in 280ms cubic-bezier(0.2, 0, 0, 1) backwards;
+}
+
+@keyframes card-in {
+  from {
+    transform: translateY(56px);
+    opacity: 0;
+  }
 }
 
 /* ---------- 动效偏好 ---------- */
@@ -858,13 +898,5 @@ h1, h2, h3, h4 {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
-  }
-
-  /* 跨页转场同样禁用（瞬切） */
-  ::view-transition-group(*),
-  ::view-transition-image-pair(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
   }
 }
