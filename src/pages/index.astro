@@ -359,9 +359,17 @@ const latest = posts.slice(0, 3);
     justify-content: center;
   }
 
-  /* 暗色下反白面板 = 大面积浅灰亮板，同叠纸底层一起降为阴影灰 */
+  /* 暗色下面板不做 token 级反白（会变成大亮板/灰板）：
+     深底 + 浅字 + 浅色标签块，与浅色版"黑面板白chip"同一视觉结构 */
   :global([data-theme='dark']) .sysinfo-about {
-    background: var(--shadow-c);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  :global([data-theme='dark']) .sysinfo-h-invert {
+    color: var(--on-ink);
+    background: var(--ink);
+    border-color: var(--ink);
   }
 
   .sysinfo-h-invert {
