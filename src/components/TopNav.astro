@@ -98,6 +98,12 @@ const isActive = (href: string) =>
     const apply = () => {
       root.dataset.theme = next;
       localStorage.setItem('theme', next);
+
+      // 点击确认反馈：图标旋转弹跳一次（重启动画以支持连续点击）
+      const btn = document.getElementById('theme-toggle');
+      btn?.classList.remove('icon-pop');
+      void (btn as HTMLElement).offsetWidth;
+      btn?.classList.add('icon-pop');
     };
 
     // 无 VT 能力 / 已检测到异常 / 减速动效：直接切换（@property 令牌过渡负责平滑变色）

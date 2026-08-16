@@ -352,7 +352,7 @@ h1, h2, h3, h4 {
   border-color: var(--ink);
 }
 
-/* 主题切换：状态语言保持单一——悬浮=信号红填充，按下=下沉，点击=图标切换 */
+/* 主题切换：整站统一按压模型（悬浮抬起+阴影 → 按下压入）+ 点击图标弹跳 */
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -361,17 +361,39 @@ h1, h2, h3, h4 {
   color: var(--ink);
   background: transparent;
   border: var(--border-w) solid var(--ink);
+  box-shadow: 4px 4px 0 0 var(--shadow-c);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 .theme-toggle:hover {
   background: var(--red);
   color: var(--on-red);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 0 var(--shadow-c);
 }
 
 .theme-toggle:active {
-  transform: translateY(2px);
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 0 var(--shadow-c);
+}
+
+/* 点击反馈：当前图标旋转弹跳一次 */
+@keyframes toggle-pop {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(90deg) scale(0.6);
+  }
+  100% {
+    transform: rotate(180deg) scale(1);
+  }
+}
+
+.theme-toggle.icon-pop svg {
+  animation: toggle-pop 0.35s ease;
 }
 
 .theme-toggle svg {
