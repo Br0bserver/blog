@@ -81,27 +81,31 @@ const isActive = (href: string) =>
   interface ViewTransitionLike {
     ready: Promise<void>;
     finished: Promise<void>;
+    skipTransition?: () => void;
   }
 
   let wiping = false;
+  let vtUsable = true; // 检测到当前环境 VT 实现异常后，本次会话内永久降级
 
   document.getElementById('theme-toggle')?.addEventListener('click', (e) => {
     const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
     const toggle = e.currentTarget as HTMLElement;
+
+    const doc = document as Document & {
+      startViewTransition?: (cb: () => void) => ViewTransitionLike;
+    };
 
     const apply = () => {
       root.dataset.theme = next;
       localStorage.setItem('theme', next);
     };
 
-    const startVT = (
-      document as Document & {
-        startViewTransition?: (cb: () => void) => ViewTransitionLike;
-      }
-    ).startViewTransition;
-
-    // 无 VT 能力 / 减速动效：直接切换（@property 令牌过渡负责平滑变色）
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !startVT) {
+    // 无 VT 能力 / 已检测到异常 / 减速动效：直接切换（@property 令牌过渡负责平滑变色）
+    if (
+      !vtUsable ||
+      matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      !doc.startViewTransition
+    ) {
       apply();
       return;
     }
@@ -113,28 +117,55 @@ const isActive = (href: string) =>
     // 让圆形边界展开的即是最终配色
     root.style.transition = 'none';
 
-    // 兜底清理：finished 在个别环境（隐藏的 webview 等）可能不结算，
-    // 超时强制解锁，保证按钮永远不会卡死
     let cleaned = false;
+    let failsafe = 0;
+    let forceTimer = 0;
+    let applied = false;
+
+    const applyOnce = () => {
+      if (applied) return;
+      applied = true;
+      apply();
+    };
+
+    // 兜底清理：finished 在个别环境（卡死的 WebView）可能不结算，
+    // 超时强制解锁，保证按钮永远不会卡死
     const cleanup = () => {
       if (cleaned) return;
       cleaned = true;
+      clearTimeout(failsafe);
+      clearTimeout(forceTimer);
       root.style.removeProperty('transition');
       wiping = false;
     };
-    const failsafe = setTimeout(cleanup, 1000);
+    failsafe = window.setTimeout(cleanup, 1000);
 
     let vt: ViewTransitionLike | null = null;
     try {
-      vt = startVT(apply);
+      // 必须绑定在 document 上调用，解绑调用会抛 Illegal invocation
+      vt = doc.startViewTransition(() => applyOnce());
     } catch {
-      // VT 存在但调用抛异常（部分 WebView 实现）：退回直接切换，
-      // @property 令牌过渡负责平滑变色
-      clearTimeout(failsafe);
+      // VT 调用抛异常（部分 WebView）：退回直接切换并标记降级
+      vtUsable = false;
       cleanup();
-      apply();
+      applyOnce();
       return;
     }
+
+    // VT 启动成功但回调迟迟不执行（卡死的 WebView）：
+    // 跳过过渡、强制完成切换，并永久降级，避免残留的过渡层挡住页面
+    forceTimer = window.setTimeout(() => {
+      if (!applied) {
+        vtUsable = false;
+        try {
+          vt?.skipTransition?.();
+        } catch {
+          /* ignore */
+        }
+        applyOnce();
+        cleanup();
+      }
+    }, 150);
 
     vt.ready
       .then(() => {
@@ -164,11 +195,10 @@ const isActive = (href: string) =>
       .catch(() => {});
 
     vt.finished
-      .catch(() => {})
-      .finally(() => {
-        clearTimeout(failsafe);
-        cleanup();
-      });
+      .catch(() => {
+        vtUsable = false; // 过渡异常结束：同样永久降级
+      })
+      .finally(cleanup);
   });
 
   // 用户手动选择过（localStorage 有值）之前，实时跟随系统亮暗变化
