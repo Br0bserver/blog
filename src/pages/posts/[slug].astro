@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import 'katex/dist/katex.min.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { sortedPosts, wordsPlaceholder } from '../../lib/posts';
 import { formatDate } from '../../lib/format';
@@ -298,6 +299,8 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     box-shadow: 8px 8px 0 0 var(--shadow-c);
     padding: 32px;
     min-width: 0;
+    max-width: none;
+    transition: max-width 0.3s cubic-bezier(0.2, 0, 0, 1);
   }
 
   .post-header {
@@ -381,6 +384,12 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
 
     :global(html[data-post-side='closed']) .post-side {
       opacity: 0;
+    }
+
+    /* 收起后正文卡随 720px 排版宽收窄（720 + 内边距 64 + 边框 8），
+       避免卡内右侧空出一大块 */
+    :global(html[data-post-side='closed']) .post-main {
+      max-width: 792px;
     }
 
     .pn-section {
@@ -563,5 +572,35 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
   [data-theme='dark'] .post-body pre,
   [data-theme='dark'] .post-body pre span {
     color: var(--shiki-dark) !important;
+  }
+
+  /* 代码块滚动条：不用原生外观，扁平墨色窄条 */
+  .post-body pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink) transparent;
+  }
+
+  .post-body pre::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .post-body pre::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .post-body pre::-webkit-scrollbar-thumb {
+    background: var(--ink);
+  }
+
+  .post-body pre::-webkit-scrollbar-thumb:hover {
+    background: var(--red);
+  }
+
+  /* KaTeX：块级公式横向可滚、间距纳入节奏 */
+  .post-body .katex-display {
+    margin: 28px 0 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0;
   }
 </style>
