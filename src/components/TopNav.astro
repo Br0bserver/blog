@@ -6,7 +6,7 @@ const navItems = [
 ];
 
 const currentPath = Astro.url.pathname;
-const normalize = (p: string) => (p.endsWith('/') && p !== '/' ? p.slice(0, -1) : p);
+const normalize = (path: string) => (path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path);
 const isActive = (href: string) =>
   href === '/' ? currentPath === '/' : normalize(currentPath).startsWith(href);
 ---
@@ -14,9 +14,7 @@ const isActive = (href: string) =>
 <nav class="topnav">
   <div class="topnav-inner">
     <div class="topnav-terminal" aria-hidden="true"></div>
-    <a class="nav-logo" href="/" aria-label="BRUTALIST_BLOG — 返回首页">
-      BRUTALIST_BLOG
-    </a>
+    <a class="nav-logo" href="/" aria-label="BRUTALIST_BLOG — 返回首页"> BRUTALIST_BLOG </a>
 
     <div class="nav-links">
       {
@@ -76,145 +74,145 @@ const isActive = (href: string) =>
 </nav>
 
 <script>
-  const root = document.documentElement;
+  import { initThemeToggle } from '../scripts/themeToggle';
+  initThemeToggle();
+</script>
 
-  interface ViewTransitionLike {
-    ready: Promise<void>;
-    finished: Promise<void>;
-    skipTransition?: () => void;
+<style>
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    backdrop-filter: blur(4px);
+    border-bottom: var(--border-w) solid var(--ink);
   }
 
-  let wiping = false;
-  let vtUsable = true; // 检测到当前环境 VT 实现异常后，本次会话内永久降级
+  .topnav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    height: 80px;
+    padding-inline: var(--margin);
+    position: relative;
+  }
 
-  document.getElementById('theme-toggle')?.addEventListener('click', (e) => {
-    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    const toggle = e.currentTarget as HTMLElement;
+  .topnav-terminal {
+    position: absolute;
+    bottom: -8px;
+    left: 10%;
+    width: 1rem;
+    height: 1rem;
+    background: var(--ink);
+  }
 
-    const doc = document as Document & {
-      startViewTransition?: (cb: () => void) => ViewTransitionLike;
-    };
+  .nav-logo {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    text-decoration: none;
+    color: var(--on-ink);
+    background: var(--ink);
+    padding: 8px 16px;
+    border: var(--border-w) solid var(--ink);
+  }
 
-    const apply = () => {
-      root.dataset.theme = next;
-      localStorage.setItem('theme', next);
+  .nav-links {
+    display: none;
+    gap: var(--gutter);
+    align-items: center;
+    margin-left: auto;
+  }
 
-      // 点击确认反馈：图标旋转弹跳一次（重启动画以支持连续点击）
-      const btn = document.getElementById('theme-toggle');
-      btn?.classList.remove('icon-pop');
-      void (btn as HTMLElement).offsetWidth;
-      btn?.classList.add('icon-pop');
-    };
+  .nav-link {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 6px 10px;
+    border: 2px solid transparent;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
 
-    // 无 VT 能力 / 已检测到异常 / 减速动效：直接切换（@property 令牌过渡负责平滑变色）
-    if (
-      !vtUsable ||
-      matchMedia('(prefers-reduced-motion: reduce)').matches ||
-      !doc.startViewTransition
-    ) {
-      apply();
-      return;
+  .nav-link:hover,
+  .nav-link.active {
+    background: var(--ink);
+    color: var(--on-ink);
+    border-color: var(--ink);
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    color: var(--ink);
+    background: transparent;
+    border: var(--border-w) solid var(--ink);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      transform 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+
+  .theme-toggle:hover,
+  .theme-toggle:focus-visible {
+    background: var(--red);
+    color: var(--on-red);
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 0 var(--shadow-c);
+  }
+
+  .theme-toggle:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+  }
+
+  @keyframes toggle-pop {
+    0%,
+    100% {
+      transform: scale(1);
     }
-
-    if (wiping) return; // 上一次扩散进行中，忽略连点
-    wiping = true;
-
-    // VT 快照会冻结颜色过渡的起始帧，切换瞬间先停用令牌过渡，
-    // 让圆形边界展开的即是最终配色；.vt-theme 同时限定全局的
-    // 快照压制规则只作用于主题切换，不波及跨页转场
-    root.style.transition = 'none';
-    root.classList.add('vt-theme');
-
-    let cleaned = false;
-    let failsafe = 0;
-    let forceTimer = 0;
-    let applied = false;
-
-    const applyOnce = () => {
-      if (applied) return;
-      applied = true;
-      apply();
-    };
-
-    // 兜底清理：finished 在个别环境（卡死的 WebView）可能不结算，
-    // 超时强制解锁，保证按钮永远不会卡死
-    const cleanup = () => {
-      if (cleaned) return;
-      cleaned = true;
-      clearTimeout(failsafe);
-      clearTimeout(forceTimer);
-      root.style.removeProperty('transition');
-      root.classList.remove('vt-theme');
-      wiping = false;
-    };
-    failsafe = window.setTimeout(cleanup, 1000);
-
-    let vt: ViewTransitionLike | null = null;
-    try {
-      // 必须绑定在 document 上调用，解绑调用会抛 Illegal invocation
-      vt = doc.startViewTransition(() => applyOnce());
-    } catch {
-      // VT 调用抛异常（部分 WebView）：退回直接切换并标记降级
-      vtUsable = false;
-      cleanup();
-      applyOnce();
-      return;
+    40% {
+      transform: scale(0.4);
     }
-
-    // VT 启动成功但回调迟迟不执行（卡死的 WebView）：
-    // 跳过过渡、强制完成切换，并永久降级，避免残留的过渡层挡住页面
-    forceTimer = window.setTimeout(() => {
-      if (!applied) {
-        vtUsable = false;
-        try {
-          vt?.skipTransition?.();
-        } catch {
-          /* ignore */
-        }
-        applyOnce();
-        cleanup();
-      }
-    }, 150);
-
-    vt.ready
-      .then(() => {
-        const rect = toggle.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        // 圆半径 = 按钮中心到视口最远角的距离，保证完整覆盖
-        const radius = Math.hypot(
-          Math.max(cx, window.innerWidth - cx),
-          Math.max(cy, window.innerHeight - cy),
-        );
-
-        root.animate(
-          {
-            clipPath: [
-              `circle(0px at ${cx}px ${cy}px)`,
-              `circle(${radius}px at ${cx}px ${cy}px)`,
-            ],
-          },
-          {
-            duration: 450,
-            easing: 'ease-in-out',
-            pseudoElement: '::view-transition-new(root)',
-          },
-        );
-      })
-      .catch(() => {});
-
-    vt.finished
-      .catch(() => {
-        vtUsable = false; // 过渡异常结束：同样永久降级
-      })
-      .finally(cleanup);
-  });
-
-  // 用户手动选择过（localStorage 有值）之前，实时跟随系统亮暗变化
-  // （系统触发的切换只走 @property 平滑过渡，不播圆形扩散）
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('theme')) {
-      root.dataset.theme = e.matches ? 'dark' : 'light';
+    70% {
+      transform: scale(1.2);
     }
-  });
-</script>
+  }
+
+  .theme-toggle.icon-pop svg {
+    animation: toggle-pop 0.3s ease;
+  }
+
+  .theme-toggle svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .icon-sun {
+    display: none;
+  }
+  :global([data-theme='dark']) .icon-sun {
+    display: block;
+  }
+  :global([data-theme='dark']) .icon-moon {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .nav-links {
+      display: flex;
+    }
+  }
+</style>

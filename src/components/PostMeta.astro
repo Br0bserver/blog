@@ -1,0 +1,105 @@
+---
+import { formatDate } from '../lib/format';
+import { readMinutes, type Post } from '../lib/posts';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+---
+
+<aside class="post-side" id="post-side">
+  <div class="meta-card">
+    <div class="meta-row">
+      <span class="meta-label">PUBLISHED</span>
+      <span class="meta-value font-mono">{formatDate(post.data.pubDate)}</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">CATEGORY</span>
+      <span class="meta-value">{post.data.tags[0]?.toUpperCase() ?? 'POST'}</span>
+    </div>
+    <div class="meta-row meta-row-last">
+      <span class="meta-label">READ TIME</span>
+      <span class="meta-value font-mono">{readMinutes(post)} MIN</span>
+    </div>
+  </div>
+  <div class="side-tags">
+    {post.data.tags.map((tag) => <span class="side-tag">{tag.toUpperCase()}</span>)}
+  </div>
+</aside>
+
+<style>
+  .post-side {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+    overflow: hidden;
+    transition: opacity 0.2s ease;
+  }
+
+  .meta-card {
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    padding: 24px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .meta-row-last {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  .meta-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--meta);
+  }
+
+  .meta-value {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .side-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .side-tag {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    padding: 4px 10px;
+  }
+
+  @media (min-width: 900px) {
+    :global(html[data-post-side='closed']) .post-side {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+
+  @media (max-width: 899px) {
+    :global(html[data-post-side='closed']) .post-side {
+      display: none;
+    }
+  }
+</style>

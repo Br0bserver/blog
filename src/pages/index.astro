@@ -1,11 +1,9 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostRow from '../components/PostRow.astro';
+import { sortedPosts } from '../lib/posts';
 
-const posts = (await getCollection('blog')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const posts = await sortedPosts();
 const latest = posts.slice(0, 3);
 ---
 
@@ -36,9 +34,9 @@ const latest = posts.slice(0, 3);
         <p class="hero-def">
           <span class="hero-def-tag">DEF.</span>
           A rigorous intersection of
-          <span class="chip chip-tilt-neg">Swiss Modernist</span> precision and
-          Neo-Brutalist <span class="chip chip-tilt-pos">raw energy</span>.
-          Order is the skeleton. Loudness is the personality.
+          <span class="chip chip-tilt-neg">Swiss Modernist</span> precision and Neo-Brutalist <span
+            class="chip chip-tilt-pos">raw energy</span
+          >. Order is the skeleton. Loudness is the personality.
         </p>
       </div>
     </section>
@@ -92,8 +90,8 @@ const latest = posts.slice(0, 3);
           <div class="sysinfo-about">
             <h3 class="sysinfo-h-invert">ABOUT_SYSTEM</h3>
             <p class="sysinfo-text">
-              这个日记本存放关于设计系统的想法——那些把功能和原始视觉冲击放在转瞬即逝的潮流之上的想法。它建立在一列不可弯曲的 12
-              列网格上，用来证明：约束不是限制，而是创作自由的地基。
+              这个日记本存放关于设计系统的想法——那些把功能和原始视觉冲击放在转瞬即逝的潮流之上的想法。它建立在一列不可弯曲的
+              12 列网格上，用来证明：约束不是限制，而是创作自由的地基。
             </p>
           </div>
         </div>
@@ -223,8 +221,14 @@ const latest = posts.slice(0, 3);
     border: var(--border-w) solid var(--ink);
   }
 
-  .chip-tilt-neg { transform: rotate(-2deg); }
-  .chip-tilt-pos { transform: rotate(2deg); background: var(--surface); color: var(--ink); }
+  .chip-tilt-neg {
+    transform: rotate(-2deg);
+  }
+  .chip-tilt-pos {
+    transform: rotate(2deg);
+    background: var(--surface);
+    color: var(--ink);
+  }
 
   @media (min-width: 768px) {
     .hero {

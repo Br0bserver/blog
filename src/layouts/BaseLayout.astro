@@ -9,10 +9,7 @@ interface Props {
   description?: string;
 }
 
-const {
-  title,
-  description = 'SWISS BRUTALIST GRID — 瑞士秩序 × 粗野骨架的博客实验',
-} = Astro.props;
+const { title, description = 'SWISS BRUTALIST GRID — 瑞士秩序 × 粗野骨架的博客实验' } = Astro.props;
 ---
 
 <!doctype html>
@@ -28,8 +25,7 @@ const {
       (() => {
         const saved = localStorage.getItem('theme');
         document.documentElement.dataset.theme =
-          saved ??
-          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          saved ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

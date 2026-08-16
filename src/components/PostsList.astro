@@ -1,14 +1,14 @@
 ---
 import PostRow from './PostRow.astro';
-import { PAGE_SIZE, wordsPlaceholder, type Post } from '../lib/posts';
+import { PAGE_SIZE, wordCount, type Post } from '../lib/posts';
 
 interface Props {
   posts: Post[];
   currentPage: number;
-  totalPosts: number;
 }
 
-const { posts, currentPage, totalPosts } = Astro.props;
+const { posts, currentPage } = Astro.props;
+const totalPosts = posts.length;
 const totalPages = Math.max(1, Math.ceil(totalPosts / PAGE_SIZE));
 const total = String(totalPosts).padStart(3, '0');
 const pageNums = Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -17,7 +17,7 @@ const prevHref = currentPage > 1 ? pageHref(currentPage - 1) : null;
 const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
 ---
 
-<div class="page">
+<div class="page" data-posts-page={currentPage} data-page-size={PAGE_SIZE}>
   <div class="measure-ruler" aria-hidden="true">
     <span>0mm</span>
     <span>1240px</span>
@@ -29,8 +29,8 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
       <span class="posts-chip">01 / POSTS</span>
       <h1 class="posts-title">INDEX</h1>
       <p class="posts-desc">
-        A complete index of thoughts on design systems, grid discipline, and
-        neo-brutalist raw energy.
+        A complete index of thoughts on design systems, grid discipline, and neo-brutalist raw
+        energy.
       </p>
     </div>
     <div class="total-box" aria-label={`共 ${totalPosts} 篇文章`}>
@@ -42,12 +42,8 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
   <!-- 排序：日期 / 字数 -->
   <div class="sort-bar" role="group" aria-label="排序方式">
     <span class="sort-label">SORT:</span>
-    <button class="sort-btn is-active" data-sort="date" aria-pressed="true">
-      DATE
-    </button>
-    <button class="sort-btn" data-sort="words" aria-pressed="false">
-      WORD COUNT
-    </button>
+    <button class="sort-btn is-active" data-sort="date" aria-pressed="true"> DATE </button>
+    <button class="sort-btn" data-sort="words" aria-pressed="false"> WORD COUNT </button>
   </div>
 
   <section class="posts-list">
@@ -55,9 +51,10 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
       posts.map((post, i) => (
         <PostRow
           post={post}
-          index={i + 1}
+          index={(i % PAGE_SIZE) + 1}
           allTags
-          words={wordsPlaceholder[post.id] ?? 0}
+          words={wordCount(post)}
+          hidden={Math.floor(i / PAGE_SIZE) + 1 !== currentPage}
         />
       ))
     }
@@ -103,76 +100,55 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
   </nav>
 </div>
 
-<!-- 首绘前恢复排序状态：HTML 是日期序，若等模块脚本再恢复会闪一下
-     DATE → WORD COUNT。此内联脚本在解析阶段同步执行，只处理
-     ?sort=words 的恢复，点击交互在下方模块脚本 -->
+<!-- 单一脚本同时负责首绘恢复和点击交互。放在列表之后同步执行，
+     可在首绘前完成 ?sort=words 的全量排序与当前页切片。 -->
 <script is:inline>
-  (function () {
-    if (new URLSearchParams(location.search).get('sort') !== 'words') return;
-    var bar = document.querySelector('.sort-bar');
-    var list = document.querySelector('.posts-list');
-    if (!bar || !list) return;
-    bar.querySelectorAll('.sort-btn').forEach(function (b) {
-      var active = b.dataset.sort === 'words';
-      b.classList.toggle('is-active', active);
-      b.setAttribute('aria-pressed', String(active));
-    });
-    Array.from(list.children)
-      .sort(function (a, b) {
-        return Number(b.dataset.words || 0) - Number(a.dataset.words || 0);
-      })
-      .forEach(function (row, i) {
-        list.appendChild(row);
-        var no = row.querySelector('.post-row-no');
-        if (no) no.textContent = String(i + 1).padStart(2, '0');
+  (() => {
+    const root = document.querySelector('[data-posts-page]');
+    const bar = root?.querySelector('.sort-bar');
+    const list = root?.querySelector('.posts-list');
+    if (!root || !bar || !list) return;
+
+    const page = Number(root.dataset.postsPage);
+    const pageSize = Number(root.dataset.pageSize);
+
+    const applySort = (key, updateUrl) => {
+      bar.querySelectorAll('.sort-btn').forEach((button) => {
+        const active = button.dataset.sort === key;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
       });
-    document.querySelectorAll('a.pager-btn').forEach(function (a) {
-      var path = (a.getAttribute('href') || '').split('?')[0];
-      if (path) a.setAttribute('href', path + '?sort=words');
+
+      const rows = Array.from(list.children).sort(
+        (a, b) => Number(b.dataset[key] || 0) - Number(a.dataset[key] || 0),
+      );
+      const pageStart = (page - 1) * pageSize;
+      const pageEnd = pageStart + pageSize;
+
+      rows.forEach((row, index) => {
+        list.appendChild(row);
+        row.hidden = index < pageStart || index >= pageEnd;
+        const number = row.querySelector('.post-row-no');
+        if (number) number.textContent = String(index - pageStart + 1).padStart(2, '0');
+      });
+
+      const query = key === 'words' ? '?sort=words' : '';
+      if (updateUrl) history.replaceState(null, '', location.pathname + query);
+      root.querySelectorAll('a.pager-btn').forEach((link) => {
+        const path = (link.getAttribute('href') || '').split('?')[0];
+        if (path) link.setAttribute('href', path + query);
+      });
+    };
+
+    const initialSort =
+      new URLSearchParams(location.search).get('sort') === 'words' ? 'words' : 'date';
+    applySort(initialSort, false);
+
+    bar.addEventListener('click', (event) => {
+      const button = event.target.closest('.sort-btn');
+      if (button) applySort(button.dataset.sort === 'words' ? 'words' : 'date', true);
     });
   })();
-</script>
-
-<script>
-  // 客户端排序（点击交互）：对当前页的行按日期/字数重排，并同步行首
-  // 编号。排序状态放 URL（?sort=words）：翻页链接携带参数，带参加载的
-  // 恢复由上方内联脚本在首绘前完成。注意：静态分页下排序只作用于当前页
-  // （demo 阶段够用，文章多了需改为构建期方案）。
-  const bar = document.querySelector<HTMLElement>('.sort-bar');
-  const list = document.querySelector<HTMLElement>('.posts-list');
-
-  const applySort = (key: 'date' | 'words', push: boolean) => {
-    if (!bar || !list) return;
-    bar.querySelectorAll('.sort-btn').forEach((b) => {
-      const active = b instanceof HTMLElement && b.dataset.sort === key;
-      b.classList.toggle('is-active', active);
-      b.setAttribute('aria-pressed', String(active));
-    });
-    const rows = Array.from(list.children) as HTMLElement[];
-    rows.sort(
-      (a, b) => Number(b.dataset[key] ?? 0) - Number(a.dataset[key] ?? 0),
-    );
-    rows.forEach((row, i) => {
-      list.appendChild(row);
-      const no = row.querySelector('.post-row-no');
-      if (no) no.textContent = String(i + 1).padStart(2, '0');
-    });
-    // 同步 URL 与翻页链接
-    const param = key === 'words' ? '?sort=words' : '';
-    if (push) history.replaceState(null, '', location.pathname + param);
-    document.querySelectorAll<HTMLAnchorElement>('a.pager-btn').forEach((a) => {
-      const path = a.getAttribute('href')?.split('?')[0];
-      if (path) a.setAttribute('href', path + param);
-    });
-  };
-
-  if (bar && list) {
-    bar.addEventListener('click', (e) => {
-      const btn = (e.target as HTMLElement).closest<HTMLElement>('.sort-btn');
-      if (!btn) return;
-      applySort(btn.dataset.sort === 'words' ? 'words' : 'date', true);
-    });
-  }
 </script>
 
 <style>
@@ -275,7 +251,9 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
     border: var(--border-w) solid var(--ink);
     padding: 6px 16px;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
   }
 
   .sort-btn:hover {
@@ -316,7 +294,9 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
     min-width: 40px;
     text-align: center;
     text-decoration: none;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
   }
 
   a.pager-btn:hover {

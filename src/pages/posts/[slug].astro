@@ -1,25 +1,32 @@
 ---
 import { render } from 'astro:content';
 import 'katex/dist/katex.min.css';
+import AdjacentPosts from '../../components/AdjacentPosts.astro';
+import ArticleContent from '../../components/ArticleContent.astro';
+import PostMeta from '../../components/PostMeta.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { sortedPosts, wordsPlaceholder } from '../../lib/posts';
-import { formatDate } from '../../lib/format';
+import { sortedPosts, type Post } from '../../lib/posts';
 
 export async function getStaticPaths() {
   const posts = await sortedPosts();
-  return posts.map((post, i) => ({
+  return posts.map((post, index) => ({
     params: { slug: post.id },
     props: {
       post,
-      prev: posts[i - 1] ?? null, // 更新的一篇
-      next: posts[i + 1] ?? null, // 更早的一篇
+      prev: posts[index - 1] ?? null,
+      next: posts[index + 1] ?? null,
     },
   }));
 }
 
-const { post, prev, next } = Astro.props;
+interface Props {
+  post: Post;
+  prev: Post | null;
+  next: Post | null;
+}
+
+const { post, prev, next } = Astro.props as Props;
 const { Content } = await render(post);
-const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400));
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description}>
@@ -29,7 +36,6 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
       <span>1240px</span>
     </div>
 
-    <!-- 首绘前恢复侧栏开合状态，避免布局跳动 -->
     <script is:inline>
       document.documentElement.dataset.postSide =
         localStorage.getItem('post-sidebar') === 'closed' ? 'closed' : 'open';
@@ -41,158 +47,36 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
           <span class="back-arrow" aria-hidden="true">‹</span>
           BACK TO POSTS
         </a>
-        <button id="side-toggle" class="side-toggle" type="button" aria-expanded="true" aria-controls="post-side">
+        <button class="side-toggle" type="button" aria-expanded="true" aria-controls="post-side">
           <span class="side-arrow" aria-hidden="true"></span>
           META
         </button>
       </div>
 
-      <aside class="post-side" id="post-side">
-        <div class="meta-card">
-          <div class="meta-row">
-            <span class="meta-label">PUBLISHED</span>
-            <span class="meta-value font-mono">{formatDate(post.data.pubDate)}</span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">CATEGORY</span>
-            <span class="meta-value">{post.data.tags[0]?.toUpperCase() ?? 'POST'}</span>
-          </div>
-          <div class="meta-row meta-row-last">
-            <span class="meta-label">READ TIME</span>
-            <span class="meta-value font-mono">{minutes} MIN</span>
-          </div>
-        </div>
-        <div class="side-tags">
-          {post.data.tags.map((t) => <span class="side-tag">{t.toUpperCase()}</span>)}
-        </div>
-      </aside>
-
-      <article class="post-main">
-        <header class="post-header">
-          <h1 class="post-title">{post.data.title}</h1>
-        </header>
-
-        <div class="post-body">
-          <Content />
-        </div>
-
-        <div class="hatch-divider" aria-hidden="true"></div>
-
-        <div class="author-block">
-          <div>
-            <h4 class="author-name">ARCHIVE_EDITOR</h4>
-            <p class="author-bio">
-              记录设计系统、网格纪律与粗野骨架的实验场。EST. 2026。
-            </p>
-          </div>
-        </div>
-      </article>
+      <PostMeta post={post} />
+      <ArticleContent title={post.data.title}>
+        <Content />
+      </ArticleContent>
     </div>
 
-    <!-- 上一篇 / 下一篇：完全复刻列表页的 post-row -->
-    <section class="pn-section" aria-label="相邻文章">
-      {prev ? (
-        <a class="post-row" href={`/posts/${prev.id}/`}>
-          <div class="post-row-no">‹</div>
-          <div class="post-row-main">
-            <div class="post-row-title">{prev.data.title}</div>
-            <div class="post-row-meta">
-              <span class="post-row-tag">PREV</span>
-              <time datetime={prev.data.pubDate.toISOString()}>
-                {formatDate(prev.data.pubDate)}
-              </time>
-              <span class="post-row-words">
-                {(wordsPlaceholder[prev.id] ?? 0).toLocaleString('en-US')} 字
-              </span>
-            </div>
-          </div>
-        </a>
-      ) : (
-        <div class="post-row pn-empty">
-          <div class="post-row-no">‹</div>
-          <div class="post-row-main">
-            <div class="post-row-title">NO MORE POSTS</div>
-          </div>
-        </div>
-      )}
-      {next ? (
-        <a class="post-row" href={`/posts/${next.id}/`}>
-          <div class="post-row-no">›</div>
-          <div class="post-row-main">
-            <div class="post-row-title">{next.data.title}</div>
-            <div class="post-row-meta">
-              <span class="post-row-tag">NEXT</span>
-              <time datetime={next.data.pubDate.toISOString()}>
-                {formatDate(next.data.pubDate)}
-              </time>
-              <span class="post-row-words">
-                {(wordsPlaceholder[next.id] ?? 0).toLocaleString('en-US')} 字
-              </span>
-            </div>
-          </div>
-        </a>
-      ) : (
-        <div class="post-row pn-empty">
-          <div class="post-row-no">›</div>
-          <div class="post-row-main">
-            <div class="post-row-title">NO MORE POSTS</div>
-          </div>
-        </div>
-      )}
-    </section>
+    <AdjacentPosts prev={prev} next={next} />
   </div>
 </BaseLayout>
 
 <script>
-  // 侧栏收起：状态挂 html[data-post-side]，localStorage 持久化
-  const buttons = document.querySelectorAll('.side-toggle');
-  const sync = (closed: boolean) =>
-    buttons.forEach((b) => b.setAttribute('aria-expanded', String(!closed)));
-  sync(document.documentElement.dataset.postSide === 'closed');
-  buttons.forEach((btn) =>
-    btn.addEventListener('click', () => {
-      const closed = document.documentElement.dataset.postSide !== 'closed';
-      document.documentElement.dataset.postSide = closed ? 'closed' : 'open';
-      localStorage.setItem('post-sidebar', closed ? 'closed' : 'open');
-      sync(closed);
-    }),
-  );
+  const toggle = document.querySelector('.side-toggle');
+  const syncSidebar = (closed: boolean) => toggle?.setAttribute('aria-expanded', String(!closed));
 
-  // 代码块复制按钮动态注入
-  document.querySelectorAll('.post-body pre').forEach((pre) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'code-wrapper';
-    pre.parentNode?.insertBefore(wrapper, pre);
-    wrapper.appendChild(pre);
-
-    const btn = document.createElement('button');
-    btn.className = 'code-copy-btn';
-    btn.type = 'button';
-    btn.setAttribute('aria-label', '复制代码');
-    btn.innerHTML = '<span class="copy-text">COPY</span>';
-
-    btn.addEventListener('click', async () => {
-      const code = pre.querySelector('code')?.innerText || pre.innerText;
-      try {
-        await navigator.clipboard.writeText(code);
-        btn.classList.add('copied');
-        const textSpan = btn.querySelector('.copy-text');
-        if (textSpan) textSpan.textContent = 'COPIED!';
-        setTimeout(() => {
-          btn.classList.remove('copied');
-          if (textSpan) textSpan.textContent = 'COPY';
-        }, 2000);
-      } catch (err) {
-        console.error('Failed to copy: ', err);
-      }
-    });
-
-    wrapper.appendChild(btn);
+  syncSidebar(document.documentElement.dataset.postSide === 'closed');
+  toggle?.addEventListener('click', () => {
+    const closed = document.documentElement.dataset.postSide !== 'closed';
+    document.documentElement.dataset.postSide = closed ? 'closed' : 'open';
+    localStorage.setItem('post-sidebar', closed ? 'closed' : 'open');
+    syncSidebar(closed);
   });
 </script>
 
 <style>
-  /* ---------- 布局：顶栏 + 侧栏 + 正文 ---------- */
   .post-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -248,7 +132,9 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     border: var(--border-w) solid var(--ink);
     padding: 6px 16px;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
   }
 
   .side-toggle:hover {
@@ -264,140 +150,6 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     content: '›';
   }
 
-  /* ---------- 侧栏 ---------- */
-  .post-side {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    min-width: 0;
-    overflow: hidden;
-    transition: opacity 0.2s ease;
-  }
-
-  .meta-card {
-    background: var(--surface);
-    border: var(--border-w) solid var(--ink);
-    box-shadow: 8px 8px 0 0 var(--shadow-c);
-    padding: 24px;
-  }
-
-  .meta-row {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding-bottom: 16px;
-    margin-bottom: 16px;
-    border-bottom: 2px solid var(--ink);
-  }
-
-  .meta-row-last {
-    padding-bottom: 0;
-    margin-bottom: 0;
-    border-bottom: none;
-  }
-
-  .meta-label {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    color: var(--meta);
-  }
-
-  .meta-value {
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  .side-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .side-tag {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    color: var(--ink);
-    background: var(--surface);
-    border: 2px solid var(--ink);
-    padding: 4px 10px;
-  }
-
-  /* ---------- 正文卡 ---------- */
-  .post-main {
-    background: var(--surface);
-    border: var(--border-w) solid var(--ink);
-    box-shadow: 8px 8px 0 0 var(--shadow-c);
-    padding: 32px;
-    min-width: 0;
-  }
-
-  .post-header {
-    border-bottom: var(--border-w) solid var(--ink);
-    padding-bottom: 32px;
-    margin-bottom: 40px;
-  }
-
-  .post-title {
-    font-size: clamp(36px, 5.5vw, 64px);
-    font-weight: 900;
-    line-height: 0.98;
-    letter-spacing: -0.02em;
-    overflow-wrap: break-words;
-  }
-
-  /* 斜纹分隔条 */
-  .hatch-divider {
-    height: 12px;
-    border-block: 2px solid var(--ink);
-    background: repeating-linear-gradient(
-      45deg,
-      var(--ink) 0 2px,
-      transparent 2px 8px
-    );
-    margin: 48px 0;
-  }
-
-  /* 作者块 */
-  .author-block {
-    display: flex;
-    align-items: center;
-    border: var(--border-w) solid var(--ink);
-    box-shadow: inset 10px 0 0 0 var(--red);
-    background: var(--bg);
-    padding: 24px 24px 24px 34px;
-  }
-
-  .author-name {
-    font-size: 18px;
-    font-weight: 900;
-    margin: 0 0 8px;
-  }
-
-  .author-bio {
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--meta);
-  }
-
-  /* ---------- 上一篇 / 下一篇：卡片直接用全局 .post-row，
-     此处只管区块容器与空态 ---------- */
-  .pn-section {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-    border-top: var(--border-w) solid var(--ink);
-    padding-top: 48px;
-  }
-
-  .pn-empty {
-    opacity: 0.35;
-    box-shadow: none;
-  }
-
-  /* ---------- 桌面端：侧栏列 + 收起 ---------- */
   @media (min-width: 900px) {
     .post-layout {
       grid-template-columns: 300px minmax(0, 1fr);
@@ -411,272 +163,8 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     }
 
     :global(html[data-post-side='closed']) .post-layout {
-      grid-template-columns: 0px minmax(0, 1fr);
+      grid-template-columns: 0 minmax(0, 1fr);
       gap: 0;
     }
-
-    :global(html[data-post-side='closed']) .post-side {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .pn-section {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (max-width: 899px) {
-    :global(html[data-post-side='closed']) .post-side {
-      display: none;
-    }
-  }
-</style>
-
-<style is:global>
-  /* ---------- 正文排版系统（markdown 渲染适配） ----------
-     .post-body 仅本页使用；markdown 产出的元素不带作用域属性，
-     故整段用全局样式 + .post-body 前缀限定。
-     限宽 + 分级节奏间距 + 富元素（链接/表格/图片/分割线/代码块） */
-  .post-body {
-    font-size: 17px;
-    line-height: 1.9;
-  }
-
-  /* 节奏：段落紧、块级元素中距、标题前大间隔（首块无上边距） */
-  .post-body > * + * {
-    margin-top: 20px;
-  }
-
-  .post-body > blockquote + *,
-  .post-body > ul + *,
-  .post-body > ol + *,
-  .post-body > pre + *,
-  .post-body > img + *,
-  .post-body > table + *,
-  .post-body > hr + * {
-    margin-top: 28px;
-  }
-
-  .post-body > h2 {
-    margin-top: 48px;
-  }
-
-  .post-body > h3 {
-    margin-top: 36px;
-  }
-
-  /* 首字下沉：仅当首块是段落时生效（引用开头的占位文自然跳过） */
-  .post-body > p:first-child::first-letter {
-    float: left;
-    font-size: 4.6rem;
-    line-height: 0.8;
-    font-weight: 900;
-    margin: 8px 14px 0 0;
-  }
-
-  .post-body h2 {
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -0.01em;
-    border-top: var(--border-w) solid var(--ink);
-    padding-top: 24px;
-  }
-
-  .post-body hr + h2 {
-    border-top: none;
-    padding-top: 0;
-  }
-
-  .post-body h3 {
-    font-size: 20px;
-    font-weight: 800;
-  }
-
-  .post-body blockquote {
-    padding: 24px 24px 24px 34px;
-    background: var(--surface);
-    border: var(--border-w) solid var(--ink);
-    box-shadow: inset 10px 0 0 0 var(--red), 6px 6px 0 0 var(--shadow-c);
-    font-size: 17px;
-    font-weight: 700;
-  }
-
-  .post-body blockquote p {
-    margin: 0;
-  }
-
-  .post-body ul {
-    list-style: square;
-    padding-left: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .post-body ol {
-    padding-left: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* 正文链接：信号红 + 偏移下划线，hover 反白 */
-  .post-body a {
-    color: var(--red);
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 4px;
-    transition: background 0.15s ease, color 0.15s ease;
-  }
-
-  .post-body a:hover {
-    background: var(--red);
-    color: var(--on-red);
-    text-decoration: none;
-  }
-
-  /* 图片：约束宽度 + 墨框 */
-  .post-body img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    border: 2px solid var(--ink);
-  }
-
-  /* 分割线：小号斜纹条 */
-  .post-body hr {
-    border: none;
-    height: 10px;
-    border-block: 2px solid var(--ink);
-    background: repeating-linear-gradient(
-      45deg,
-      var(--ink) 0 2px,
-      transparent 2px 8px
-    );
-  }
-
-  /* 表格：mono 表头 + 细线网格 */
-  .post-body table {
-    width: 100%;
-    border: 2px solid var(--ink);
-    border-collapse: collapse;
-    font-size: 15px;
-  }
-
-  .post-body th {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    text-align: left;
-    background: var(--faint);
-    padding: 10px 12px;
-    border-bottom: 2px solid var(--ink);
-  }
-
-  .post-body td {
-    padding: 10px 12px;
-    border-top: 1px solid var(--hairline);
-  }
-
-  /* 行内 code：chip 样式，不污染代码块 */
-  .post-body :not(pre) > code {
-    font-family: var(--font-mono);
-    font-size: 15px;
-    background: var(--faint);
-    padding: 2px 8px;
-  }
-
-  /* 代码块容器与复制按钮（瑞士粗野风） */
-  .post-body .code-wrapper {
-    position: relative;
-    width: 100%;
-  }
-
-  .post-body .code-copy-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 78px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--ink);
-    background: var(--surface);
-    border: 2px solid var(--ink);
-    padding: 4px 10px;
-    cursor: pointer;
-    box-shadow: 3px 3px 0 0 var(--shadow-c);
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease,
-      box-shadow 0.15s ease, border-color 0.15s ease;
-  }
-
-  .post-body .code-copy-btn:hover {
-    background: var(--ink);
-    color: var(--on-ink);
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 0 var(--shadow-c);
-  }
-
-  .post-body .code-copy-btn.copied {
-    background: var(--red);
-    color: var(--on-red);
-    border-color: var(--ink);
-    box-shadow: none;
-    transform: translate(2px, 2px);
-  }
-
-  /* 代码块：衬底色块 + 墨框 + 横向滚动，配色交给 shiki；
-     暗色下切换到 --shiki-dark 变量（背景强制走令牌） */
-  .post-body pre {
-    font-family: var(--font-mono);
-    font-size: 14px;
-    line-height: 1.7;
-    background: var(--bg) !important;
-    border: var(--border-w) solid var(--ink);
-    padding: 20px 84px 20px 24px;
-    overflow-x: auto;
-  }
-
-  [data-theme='dark'] .post-body pre,
-  [data-theme='dark'] .post-body pre span {
-    color: var(--shiki-dark) !important;
-  }
-
-  /* 代码块滚动条：不用原生外观，扁平墨色窄条 */
-  .post-body pre {
-    scrollbar-width: thin;
-    scrollbar-color: var(--ink) transparent;
-  }
-
-  .post-body pre::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  .post-body pre::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .post-body pre::-webkit-scrollbar-thumb {
-    background: var(--ink);
-  }
-
-  .post-body pre::-webkit-scrollbar-thumb:hover {
-    background: var(--red);
-  }
-
-  /* KaTeX：块级公式横向可滚、间距纳入节奏 */
-  .post-body .katex-display {
-    margin: 28px 0 8px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 4px 0;
   }
 </style>

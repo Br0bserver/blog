@@ -1,0 +1,32 @@
+---
+import PostRow from './PostRow.astro';
+import { wordCount, type Post } from '../lib/posts';
+
+interface Props {
+  prev: Post | null;
+  next: Post | null;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<section class="pn-section" aria-label="相邻文章">
+  <PostRow post={prev} index="‹" tags={['PREV']} words={prev ? wordCount(prev) : undefined} />
+  <PostRow post={next} index="›" tags={['NEXT']} words={next ? wordCount(next) : undefined} />
+</section>
+
+<style>
+  .pn-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    border-top: var(--border-w) solid var(--ink);
+    padding-top: 48px;
+  }
+
+  @media (min-width: 900px) {
+    .pn-section {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

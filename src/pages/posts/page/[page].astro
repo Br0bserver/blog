@@ -12,16 +12,15 @@ export async function getStaticPaths() {
     .map((n) => ({
       params: { page: String(n) },
       props: {
-        posts: posts.slice((n - 1) * PAGE_SIZE, n * PAGE_SIZE),
+        posts,
         currentPage: n,
-        totalPosts: posts.length,
       },
     }));
 }
 
-const { posts, currentPage, totalPosts } = Astro.props;
+const { posts, currentPage } = Astro.props;
 ---
 
 <BaseLayout title={`POSTS — INDEX / ${String(currentPage).padStart(2, '0')}`}>
-  <PostsList posts={posts} currentPage={currentPage} totalPosts={totalPosts} />
+  <PostsList posts={posts} currentPage={currentPage} />
 </BaseLayout>

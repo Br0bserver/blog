@@ -16,7 +16,7 @@ const edgeText = 'EST. 2026 — SWISS_BRUTAL_DIARY';
 
 <div class="bg-grid-dots" aria-hidden="true">
   <div class="bg-cols">
-    {Array.from({ length: 12 }).map(() => <div></div>)}
+    {Array.from({ length: 12 }).map(() => <div />)}
   </div>
 </div>
 
@@ -34,9 +34,7 @@ const edgeText = 'EST. 2026 — SWISS_BRUTAL_DIARY';
 
     const update = () => {
       ticking = false;
-      layer.style.transform = reduced.matches
-        ? ''
-        : `translateY(${window.scrollY * RATE}px)`;
+      layer.style.transform = reduced.matches ? '' : `translateY(${window.scrollY * RATE}px)`;
     };
 
     window.addEventListener(
@@ -89,3 +87,97 @@ const edgeText = 'EST. 2026 — SWISS_BRUTAL_DIARY';
   document.fonts?.ready.then(normalize);
   normalize();
 </script>
+
+<style>
+  .bg-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -10;
+    user-select: none;
+  }
+
+  .bg-words {
+    position: absolute;
+    inset: 0;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--faint);
+    opacity: 0.5;
+    will-change: transform;
+  }
+
+  .bg-words span {
+    position: absolute;
+    font-size: clamp(300px, 35vw, 450px);
+    transform: rotate(-8deg);
+  }
+
+  .w1 {
+    top: 1%;
+    left: -5%;
+  }
+  .w2 {
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-8deg);
+  }
+  .w3 {
+    top: 90%;
+    right: -5%;
+  }
+
+  .bg-grid-dots {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .bg-grid-dots::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--ink) 2px, transparent 0);
+    background-size: 24px 24px;
+    opacity: 0.1;
+  }
+
+  .bg-cols {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--gutter);
+    padding-inline: var(--margin);
+    opacity: 0.1;
+  }
+
+  .bg-cols > div {
+    border-right: 1px dashed var(--ink);
+    height: 100%;
+  }
+
+  .bg-cols > div:last-child {
+    border-right: none;
+  }
+
+  .edge-label {
+    position: fixed;
+    right: 1rem;
+    top: 50%;
+    transform: rotate(-90deg);
+    transform-origin: right center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--meta);
+    z-index: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+</style>

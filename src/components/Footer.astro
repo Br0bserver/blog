@@ -17,3 +17,90 @@ const year = new Date().getFullYear();
     </div>
   </div>
 </footer>
+
+<style>
+  .site-footer {
+    border-top: var(--border-w) solid var(--ink);
+    background: var(--surface);
+    margin-top: 96px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: center;
+    justify-items: center;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding: var(--margin);
+    min-height: 120px;
+  }
+
+  .footer-logo {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: var(--on-ink);
+    background: var(--ink);
+    padding: 8px 16px;
+    border: var(--border-w) solid var(--ink);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-link {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 8px 16px;
+    border: var(--border-w) solid var(--ink);
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .footer-link:hover {
+    background: var(--ink);
+    color: var(--on-ink);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
+  }
+
+  .footer-copy {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--meta);
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .footer-inner {
+      grid-template-columns: 1fr 1fr 1fr;
+      justify-items: stretch;
+    }
+
+    .footer-logo {
+      justify-self: start;
+      align-self: start;
+    }
+    .footer-links {
+      justify-self: center;
+    }
+    .footer-copy {
+      text-align: right;
+      align-self: center;
+    }
+  }
+</style>

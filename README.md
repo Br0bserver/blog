@@ -2,26 +2,33 @@
 
 瑞士平面 × 新粗野主义（Swiss Brutalism）风格的个人博客，基于 [Astro](https://astro.build) 静态构建。
 
+运行环境：Node.js 22.12 或更高版本。
+
 ## 命令
 
-| 命令 | 说明 |
-| --- | --- |
-| `npm run dev` | 本地开发服务器（localhost:4321） |
-| `npm run build` | 产出静态站点到 `dist/` |
-| `npm run preview` | 预览 `dist/` 构建结果 |
+| 命令                   | 说明                              |
+| ---------------------- | --------------------------------- |
+| `npm run dev`          | 本地开发服务器（localhost:4321）  |
+| `npm run build`        | 产出静态站点到 `dist/`            |
+| `npm run check`        | 执行 Astro 与 TypeScript 静态检查 |
+| `npm test`             | 运行核心逻辑测试                  |
+| `npm run format:check` | 检查代码格式                      |
+| `npm run preview`      | 预览 `dist/` 构建结果             |
 
 ## 结构
 
 ```
 src/
-├── components/     # 顶栏、页脚、背景层、文章行
+├── components/     # 页面组件及其局部样式和交互
 ├── content/blog/   # Markdown 文章（content collection）
 ├── layouts/        # 基础布局（字体、主题反 FOUC）
-├── lib/            # 工具函数
-├── pages/          # 路由（目前仅首页）
-└── styles/         # 全局设计系统（双主题 CSS 变量）
+├── lib/            # 文章查询、统计与纯函数测试
+├── pages/          # 首页、文章列表、分页与详情路由
+├── scripts/        # 可独立维护的客户端控制逻辑
+└── styles/         # 全局设计令牌与跨页面基础样式
 ```
 
 - 主题：浅色 / 暗色，首访跟随系统，手动切换后持久化（localStorage）
+- 文章字数与阅读时长从正文统一计算，日期及字数排序共享同一数据源
 - `DESIGN.md`：设计系统描述（Google Stitch 格式），用于向 Stitch 传递风格，不是前端实现文档
 - 页面按设计稿逐个补充，未实现的链接暂时 404 属预期

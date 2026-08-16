@@ -1,49 +1,190 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import { formatDate } from '../lib/format';
+import type { Post } from '../lib/posts';
 
 interface Props {
-  post: CollectionEntry<'blog'>;
-  index: number;
-  /** 字数（目前传占位值） */
+  post?: Post | null;
+  index: number | string;
   words?: number;
   /** 列表页展示全部标签；首页沿用单标签 */
   allTags?: boolean;
+  /** 相邻文章等场景可覆盖标签 */
+  tags?: string[];
+  emptyTitle?: string;
+  hidden?: boolean;
 }
 
-const { post, index, words, allTags = false } = Astro.props;
-const no = String(index).padStart(2, '0');
-const tags = (allTags ? post.data.tags : post.data.tags.slice(0, 1)).map((t) =>
-  t.toUpperCase(),
-);
-const fallbackTag = tags.length ? tags : ['POST'];
+const {
+  post,
+  index,
+  words,
+  allTags = false,
+  tags: tagsOverride,
+  emptyTitle = 'NO MORE POSTS',
+  hidden = false,
+} = Astro.props;
+const no = typeof index === 'number' ? String(index).padStart(2, '0') : index;
+const postTags = post
+  ? (allTags ? post.data.tags : post.data.tags.slice(0, 1)).map((tag) => tag.toUpperCase())
+  : [];
+const tags = tagsOverride ?? (postTags.length ? postTags : ['POST']);
+const Element = post ? 'a' : 'div';
 ---
 
-<a
-  href={`/posts/${post.id}/`}
-  class="post-row"
-  data-date={post.data.pubDate.valueOf()}
+<Element
+  href={post ? `/posts/${post.id}/` : undefined}
+  class:list={['post-row', { 'is-empty': !post }]}
+  data-date={post?.data.pubDate.valueOf()}
   data-words={words ?? 0}
+  hidden={hidden}
 >
   <div class="post-row-no">{no}</div>
   <div class="post-row-main">
-    <div class="post-row-title">{post.data.title}</div>
-    <div class="post-row-meta">
-      {fallbackTag.map((t) => (
-        <span class="post-row-tag">{t}</span>
-      ))}
-      <time datetime={post.data.pubDate.toISOString()}>
-        {formatDate(post.data.pubDate)}
-      </time>
-      {words !== undefined && (
-        <span class="post-row-words">{words.toLocaleString('en-US')} 字</span>
-      )}
-    </div>
+    <div class="post-row-title">{post?.data.title ?? emptyTitle}</div>
+    {
+      post && (
+        <div class="post-row-meta">
+          {tags.map((tag) => (
+            <span class="post-row-tag">{tag}</span>
+          ))}
+          <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+          {words !== undefined && (
+            <span class="post-row-words">{words.toLocaleString('en-US')} 字</span>
+          )}
+        </div>
+      )
+    }
   </div>
-</a>
+</Element>
 
 <style>
+  .post-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: var(--gutter);
+    align-items: center;
+    padding: 24px;
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    text-decoration: none;
+    overflow: hidden;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .post-row::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 16px;
+    background: var(--red);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .post-row[href]:hover {
+    background: var(--ink);
+    color: var(--on-ink);
+    transform: translate(4px, 4px);
+    box-shadow: 4px 4px 0 0 var(--red);
+  }
+
+  .post-row[href]:hover::before {
+    transform: translateX(0);
+  }
+
+  .post-row-no {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding-left: 16px;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--meta);
+    border-right: var(--border-w) solid var(--ink);
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .post-row[href]:hover .post-row-no {
+    color: var(--on-ink);
+    border-right-color: var(--on-ink);
+  }
+
   .post-row-main {
     min-width: 0;
+  }
+
+  .post-row-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-transform: uppercase;
+    transition: padding-left 0.2s ease;
+  }
+
+  .post-row[href]:hover .post-row-title {
+    padding-left: 16px;
+  }
+
+  .post-row-meta {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--meta);
+  }
+
+  .post-row[href]:hover .post-row-meta {
+    color: var(--on-ink);
+  }
+
+  .post-row-tag {
+    padding: 2px 8px;
+    border: var(--border-w) solid var(--ink);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .post-row[href]:hover .post-row-tag {
+    background: var(--on-ink);
+    color: var(--ink);
+    border-color: var(--on-ink);
+  }
+
+  .post-row-words {
+    padding: 2px 8px;
+    border: 1px solid var(--faint);
+  }
+
+  .post-row[href]:hover .post-row-words {
+    border-color: var(--on-ink);
+  }
+
+  .is-empty {
+    opacity: 0.35;
+    box-shadow: none;
+  }
+
+  @media (min-width: 768px) {
+    .post-row {
+      grid-template-columns: 80px minmax(0, 1fr);
+    }
+
+    .post-row-meta {
+      margin-top: 0;
+      text-align: right;
+    }
   }
 </style>

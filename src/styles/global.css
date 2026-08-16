@@ -5,28 +5,72 @@
 
 /* 注册颜色令牌为可动画类型（主题切换动效 D 部分）：
    切换 data-theme 时所有颜色平滑落定，而非瞬间跳变 */
-@property --bg { syntax: '<color>'; inherits: true; initial-value: #fcf9f2; }
-@property --surface { syntax: '<color>'; inherits: true; initial-value: #ffffff; }
-@property --ink { syntax: '<color>'; inherits: true; initial-value: #101010; }
-@property --on-ink { syntax: '<color>'; inherits: true; initial-value: #ffffff; }
-@property --meta { syntax: '<color>'; inherits: true; initial-value: #444748; }
-@property --meta-dim { syntax: '<color>'; inherits: true; initial-value: #888888; }
-@property --faint { syntax: '<color>'; inherits: true; initial-value: #d6d2c9; }
-@property --red { syntax: '<color>'; inherits: true; initial-value: #e63312; }
-@property --on-red { syntax: '<color>'; inherits: true; initial-value: #ffffff; }
-@property --shadow-c { syntax: '<color>'; inherits: true; initial-value: #101010; }
-@property --hairline { syntax: '<color>'; inherits: true; initial-value: rgba(16, 16, 16, 0.2); }
+@property --bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fcf9f2;
+}
+@property --surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+@property --ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #101010;
+}
+@property --on-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+@property --meta {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #444748;
+}
+@property --meta-dim {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #888888;
+}
+@property --faint {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d6d2c9;
+}
+@property --red {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e63312;
+}
+@property --on-red {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+@property --shadow-c {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #101010;
+}
+@property --hairline {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(16, 16, 16, 0.2);
+}
 
 :root {
   /* 浅色（默认） */
   --bg: #fcf9f2;
   --surface: #ffffff;
   --ink: #101010;
-  --on-ink: #ffffff;       /* 反相面板上的文字 */
+  --on-ink: #ffffff; /* 反相面板上的文字 */
   --meta: #444748;
   --meta-dim: #888888;
-  --faint: #d6d2c9;        /* 背景巨字 */
-  --shadow-c: var(--ink);  /* 硬阴影跟随墨色（浅色=黑影） */
+  --faint: #d6d2c9; /* 背景巨字 */
+  --shadow-c: var(--ink); /* 硬阴影跟随墨色（浅色=黑影） */
   --red: #e63312;
   --on-red: #ffffff;
   --hairline: rgba(16, 16, 16, 0.2);
@@ -53,9 +97,9 @@
   --on-ink: #1a1c23;
   --meta: #888888;
   --meta-dim: #888888;
-  --faint: #33343c;     /* 比原 #282a31 提高一档，水印对比度稍高 */
-  --red: #4a69bd;       /* 深色下强调色 = 工业蓝 */
-  --on-red: #e0e0e0;    /* 蓝底上的文字是浅灰而非纯白 */
+  --faint: #33343c; /* 比原 #282a31 提高一档，水印对比度稍高 */
+  --red: #4a69bd; /* 深色下强调色 = 工业蓝 */
+  --on-red: #e0e0e0; /* 蓝底上的文字是浅灰而非纯白 */
   --shadow-c: #a5a5a7; /* 七成墨色：阴影清晰又不刺眼（纯墨过亮、五成偏暗） */
   --hairline: rgba(224, 224, 224, 0.2);
   --texture: url('/textures/concrete-wall.png');
@@ -119,7 +163,10 @@ a {
   outline-offset: 2px;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   margin: 0;
   font-weight: 900;
   line-height: 1.1;
@@ -146,354 +193,9 @@ h1, h2, h3, h4 {
   font-weight: 500;
 }
 
-/* ==========================================================================
-   结构原语（brutal-*）
-   ========================================================================== */
-
-.brutal-shadow {
-  box-shadow: 8px 8px 0 0 var(--shadow-c);
-}
-
-.brutal-shadow-sm {
-  box-shadow: 4px 4px 0 0 var(--shadow-c);
-}
-
-.brutal-shadow-red {
-  box-shadow: 8px 8px 0 0 var(--red);
-}
-
-.brutal-border {
-  border: var(--border-w) solid var(--ink);
-}
-
-.brutal-border-b {
-  border-bottom: var(--border-w) solid var(--ink);
-}
-
-.brutal-border-t {
-  border-top: var(--border-w) solid var(--ink);
-}
-
-.brutal-border-r {
-  border-right: var(--border-w) solid var(--ink);
-}
-
 .text-outline {
   -webkit-text-stroke: 3px var(--ink);
   color: transparent;
-}
-
-/* 交互按压模型：hover 抬起阴影变小位移，active 压入 */
-.press {
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease,
-    color 0.15s ease;
-}
-
-.press:hover {
-  transform: translate(4px, 4px);
-}
-
-/* ==========================================================================
-   背景技术层（巨字 / 点阵 / 12列虚线网格 / 边缘标签）
-   ========================================================================== */
-
-.bg-layer {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: -10;
-  user-select: none;
-}
-
-.bg-words {
-  position: absolute;
-  inset: 0;
-  font-weight: 900;
-  line-height: 1;
-  white-space: nowrap;
-  color: var(--faint);
-  opacity: 0.5;
-  will-change: transform; /* 视差只改 transform，提升为合成层避免逐帧重绘 */
-}
-
-.bg-words span {
-  position: absolute;
-  font-size: clamp(300px, 35vw, 450px);
-  transform: rotate(-8deg);
-}
-
-/* 三个巨字顺着整页内容铺开：Hero 区 / 中段 / 底部 */
-.bg-words .w1 { top: 1%; left: -5%; }
-.bg-words .w2 { top: 46%; left: 50%; transform: translate(-50%, -50%) rotate(-8deg); }
-.bg-words .w3 { top: 90%; right: -5%; }
-
-/* 巨字层视差由 BackgroundLayer.astro 中的 rAF 脚本驱动
-   （CSS scroll timeline 在部分 WebView 会冻结滚动，弃用） */
-
-.bg-grid-dots {
-  position: absolute; /* 跟随文档滚动，与前景一起移动 */
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.bg-grid-dots::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(var(--ink) 2px, transparent 0);
-  background-size: 24px 24px;
-  opacity: 0.1;
-}
-
-.bg-cols {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--gutter);
-  padding-inline: var(--margin);
-  opacity: 0.1;
-}
-
-.bg-cols > div {
-  border-right: 1px dashed var(--ink);
-  height: 100%;
-}
-
-.bg-cols > div:last-child {
-  border-right: none;
-}
-
-/* 边缘竖排标签 */
-.edge-label {
-  position: fixed;
-  right: 1rem;
-  top: 50%;
-  transform: rotate(-90deg) translateX(0);
-  transform-origin: right center;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  color: var(--meta);
-  z-index: 0;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-/* ==========================================================================
-   顶栏
-   ========================================================================== */
-
-.topnav {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
-  backdrop-filter: blur(4px);
-  border-bottom: var(--border-w) solid var(--ink);
-}
-
-.topnav-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-  max-width: var(--page-max);
-  margin-inline: auto;
-  height: 80px;
-  padding-inline: var(--margin);
-  position: relative;
-}
-
-/* 导航上的小装饰方块 */
-.topnav-terminal {
-  position: absolute;
-  bottom: -8px;
-  left: 10%;
-  width: 1rem;
-  height: 1rem;
-  background: var(--ink);
-}
-
-.nav-logo {
-  font-size: 28px;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  text-decoration: none;
-  color: var(--on-ink);
-  background: var(--ink);
-  padding: 8px 16px;
-  border: var(--border-w) solid var(--ink);
-}
-
-.nav-links {
-  display: none;
-  gap: var(--gutter);
-  align-items: center;
-  margin-left: auto; /* 链接组靠右，贴近主题切换按钮 */
-}
-
-.nav-link {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  letter-spacing: 0.12em;
-  font-weight: 500;
-  color: var(--ink);
-  text-decoration: none;
-  padding: 6px 10px;
-  border: 2px solid transparent;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.nav-link:hover,
-.nav-link.active {
-  background: var(--ink);
-  color: var(--on-ink);
-  border-color: var(--ink);
-}
-
-/* 主题切换：navbar 是平面区域，静止时按钮无阴影保持平整；
-   阴影只在交互瞬间存在——悬浮「抬起」时出现，按下「压入」时消失 */
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  color: var(--ink);
-  background: transparent;
-  border: var(--border-w) solid var(--ink);
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease,
-    box-shadow 0.12s ease;
-}
-
-.theme-toggle:hover,
-.theme-toggle:focus-visible {
-  background: var(--red);
-  color: var(--on-red);
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0 0 var(--shadow-c);
-}
-
-.theme-toggle:active {
-  transform: translate(3px, 3px);
-  box-shadow: 0 0 0 0 var(--shadow-c);
-}
-
-/* 点击反馈：图标缩放弹跳——缩小瞬间完成切换，再弹回原位 */
-@keyframes toggle-pop {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(0.4);
-  }
-  70% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.theme-toggle.icon-pop svg {
-  animation: toggle-pop 0.3s ease;
-}
-
-.theme-toggle svg {
-  width: 24px;
-  height: 24px;
-}
-
-.theme-toggle .icon-sun { display: none; }
-
-[data-theme='dark'] .theme-toggle .icon-sun { display: block; }
-[data-theme='dark'] .theme-toggle .icon-moon { display: none; }
-
-@media (min-width: 768px) {
-  .nav-links { display: flex; }
-}
-
-/* ==========================================================================
-   页脚
-   ========================================================================== */
-
-.site-footer {
-  border-top: var(--border-w) solid var(--ink);
-  background: var(--surface);
-  margin-top: 96px;
-  position: relative;
-  z-index: 1;
-}
-
-.footer-inner {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-  align-items: center;
-  justify-items: center;
-  max-width: var(--page-max);
-  margin-inline: auto;
-  padding: var(--margin);
-  min-height: 120px;
-}
-
-.footer-logo {
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  color: var(--on-ink);
-  background: var(--ink);
-  padding: 8px 16px;
-  border: var(--border-w) solid var(--ink);
-}
-
-.footer-links {
-  display: flex;
-  gap: 24px;
-}
-
-.footer-link {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  font-weight: 500;
-  color: var(--ink);
-  text-decoration: none;
-  padding: 8px 16px;
-  border: var(--border-w) solid var(--ink);
-  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.footer-link:hover {
-  background: var(--ink);
-  color: var(--on-ink);
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0 0 var(--shadow-c);
-}
-
-.footer-copy {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--meta);
-  text-align: center;
-}
-
-@media (min-width: 768px) {
-  .footer-inner {
-    grid-template-columns: 1fr 1fr 1fr;
-    justify-items: stretch;
-  }
-
-  .footer-logo { justify-self: start; align-self: start; }
-  .footer-links { justify-self: center; }
-  .footer-copy { text-align: right; align-self: center; }
 }
 
 /* ==========================================================================
@@ -552,8 +254,12 @@ h1, h2, h3, h4 {
   margin-inline: 0;
 }
 
-.sec-divider-label.tilt-pos { transform: rotate(2deg); }
-.sec-divider-label.tilt-neg { transform: rotate(-2deg); }
+.sec-divider-label.tilt-pos {
+  transform: rotate(2deg);
+}
+.sec-divider-label.tilt-neg {
+  transform: rotate(-2deg);
+}
 
 /* 区块标题（黑块白字） */
 .sec-header {
@@ -566,130 +272,6 @@ h1, h2, h3, h4 {
   background: var(--ink);
   padding: 4px 16px;
   border: var(--border-w) solid var(--ink);
-}
-
-/* ==========================================================================
-   文章行
-   ========================================================================== */
-
-.post-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: var(--gutter);
-  align-items: center;
-  padding: 24px;
-  background: var(--surface);
-  border: var(--border-w) solid var(--ink);
-  box-shadow: 8px 8px 0 0 var(--shadow-c);
-  text-decoration: none;
-  overflow: hidden;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-/* hover 时滑入的红色侧条 */
-.post-row::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 16px;
-  background: var(--red);
-  transform: translateX(-100%);
-  transition: transform 0.2s ease;
-}
-
-.post-row:hover {
-  background: var(--ink);
-  color: var(--on-ink);
-  transform: translate(4px, 4px);
-  box-shadow: 4px 4px 0 0 var(--red);
-}
-
-.post-row:hover::before {
-  transform: translateX(0);
-}
-
-.post-row-no {
-  font-family: var(--font-mono);
-  font-size: 20px;
-  font-weight: 900;
-  color: var(--meta);
-  border-right: var(--border-w) solid var(--ink);
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  padding-left: 16px;
-  transition: color 0.2s ease, border-color 0.2s ease;
-}
-
-.post-row:hover .post-row-no {
-  color: var(--on-ink);
-  border-right-color: var(--on-ink);
-}
-
-.post-row-title {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.3;
-  text-transform: uppercase;
-  letter-spacing: 0;
-  transition: padding-left 0.2s ease;
-}
-
-.post-row:hover .post-row-title {
-  padding-left: 16px;
-}
-
-.post-row-meta {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  color: var(--meta);
-}
-
-.post-row:hover .post-row-meta {
-  color: var(--on-ink);
-}
-
-.post-row-tag {
-  padding: 2px 8px;
-  border: var(--border-w) solid var(--ink);
-  background: var(--surface);
-  color: var(--ink);
-}
-
-.post-row:hover .post-row-tag {
-  background: var(--on-ink);
-  color: var(--ink);
-  border-color: var(--on-ink);
-}
-
-/* 字数槽：细边框弱化，与标签区分 */
-.post-row-words {
-  padding: 2px 8px;
-  border: 1px solid var(--faint);
-}
-
-.post-row:hover .post-row-words {
-  border-color: var(--on-ink);
-}
-
-@media (min-width: 768px) {
-  .post-row {
-    grid-template-columns: 80px 1fr auto;
-  }
-
-  .post-row-meta {
-    margin-top: 0;
-    text-align: right;
-  }
 }
 
 /* ==========================================================================
@@ -710,119 +292,15 @@ h1, h2, h3, h4 {
   border: var(--border-w) solid var(--ink);
   padding: 16px 32px;
   box-shadow: 8px 8px 0 0 var(--red);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 
 .btn-primary:hover {
   transform: translate(8px, 8px);
   box-shadow: 0 0 0 0 var(--red);
-}
-
-/* ==========================================================================
-   正文排版（prose）
-   ========================================================================== */
-
-.prose {
-  font-size: 18px;
-  line-height: 1.7;
-}
-
-.prose > * + * {
-  margin-top: 1.15em;
-}
-
-.prose h2 {
-  display: inline-block;
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--on-ink);
-  background: var(--ink);
-  padding: 4px 16px;
-  margin-top: 2.2em;
-}
-
-.prose h3 {
-  font-size: 20px;
-  font-weight: 700;
-  border-bottom: var(--border-w) solid var(--ink);
-  padding-bottom: 8px;
-  margin-top: 1.8em;
-}
-
-.prose a {
-  color: var(--red);
-  font-weight: 700;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
-}
-
-.prose blockquote {
-  margin: 1.5em 0;
-  padding-left: 24px;
-  border-left: 8px solid var(--red);
-  font-weight: 700;
-}
-
-.prose ul, .prose ol {
-  padding-left: 1.5em;
-}
-
-.prose li + li {
-  margin-top: 0.4em;
-}
-
-.prose li::marker {
-  font-family: var(--font-mono);
-  font-weight: 700;
-}
-
-.prose code {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 2px 6px;
-  background: var(--ink);
-  color: var(--on-ink);
-}
-
-.prose pre {
-  padding: 24px;
-  overflow-x: auto;
-  background: var(--ink);
-  border: var(--border-w) solid var(--ink);
-  box-shadow: 8px 8px 0 0 var(--shadow-c);
-}
-
-.prose pre code {
-  padding: 0;
-  background: none;
-  color: var(--on-ink);
-}
-
-.prose table {
-  width: 100%;
-  border-collapse: collapse;
-  border: var(--border-w) solid var(--ink);
-}
-
-.prose th, .prose td {
-  padding: 8px 16px;
-  border: 2px solid var(--ink);
-  text-align: left;
-}
-
-.prose th {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.prose hr {
-  height: var(--border-w);
-  background: var(--ink);
-  border: none;
-  margin: 2.5em 0;
 }
 
 /* ---------- 主题切换：圆形扩散（同文档 View Transition） ---------- */
@@ -844,9 +322,13 @@ h1, h2, h3, h4 {
 
 /* ---------- 动效偏好 ---------- */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
+  html {
+    scroll-behavior: auto;
+  }
 
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }

@@ -1,15 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostsList from '../../components/PostsList.astro';
-import { PAGE_SIZE, sortedPosts } from '../../lib/posts';
+import { sortedPosts } from '../../lib/posts';
 
 const posts = await sortedPosts();
 ---
 
 <BaseLayout title="POSTS — INDEX">
-  <PostsList
-    posts={posts.slice(0, PAGE_SIZE)}
-    currentPage={1}
-    totalPosts={posts.length}
-  />
+  <PostsList posts={posts} currentPage={1} />
 </BaseLayout>

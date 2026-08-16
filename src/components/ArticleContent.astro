@@ -1,0 +1,342 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<article class="post-main">
+  <header class="post-header">
+    <h1 class="post-title">{title}</h1>
+  </header>
+
+  <div class="post-body">
+    <slot />
+  </div>
+
+  <div class="hatch-divider" aria-hidden="true"></div>
+
+  <div class="author-block">
+    <div>
+      <h4 class="author-name">ARCHIVE_EDITOR</h4>
+      <p class="author-bio">记录设计系统、网格纪律与粗野骨架的实验场。EST. 2026。</p>
+    </div>
+  </div>
+</article>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.post-body pre').forEach((pre) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-wrapper';
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    const button = document.createElement('button');
+    button.className = 'code-copy-btn';
+    button.type = 'button';
+    button.setAttribute('aria-label', '复制代码');
+    button.innerHTML = '<span class="copy-text">COPY</span>';
+
+    button.addEventListener('click', async () => {
+      const code = pre.querySelector<HTMLElement>('code')?.innerText || pre.innerText;
+      try {
+        await navigator.clipboard.writeText(code);
+        button.classList.add('copied');
+        const label = button.querySelector('.copy-text');
+        if (label) label.textContent = 'COPIED!';
+        setTimeout(() => {
+          button.classList.remove('copied');
+          if (label) label.textContent = 'COPY';
+        }, 2000);
+      } catch (error) {
+        console.error('Failed to copy: ', error);
+      }
+    });
+
+    wrapper.appendChild(button);
+  });
+</script>
+
+<style>
+  .post-main {
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    padding: 32px;
+    min-width: 0;
+  }
+
+  .post-header {
+    border-bottom: var(--border-w) solid var(--ink);
+    padding-bottom: 32px;
+    margin-bottom: 40px;
+  }
+
+  .post-title {
+    font-size: clamp(36px, 5.5vw, 64px);
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    overflow-wrap: break-words;
+  }
+
+  .hatch-divider {
+    height: 12px;
+    border-block: 2px solid var(--ink);
+    background: repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 8px);
+    margin: 48px 0;
+  }
+
+  .author-block {
+    display: flex;
+    align-items: center;
+    border: var(--border-w) solid var(--ink);
+    box-shadow: inset 10px 0 0 0 var(--red);
+    background: var(--bg);
+    padding: 24px 24px 24px 34px;
+  }
+
+  .author-name {
+    font-size: 18px;
+    font-weight: 900;
+    margin: 0 0 8px;
+  }
+
+  .author-bio {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--meta);
+  }
+</style>
+
+<style is:global>
+  .post-body {
+    font-size: 17px;
+    line-height: 1.9;
+  }
+
+  .post-body > * + * {
+    margin-top: 20px;
+  }
+
+  .post-body > blockquote + *,
+  .post-body > ul + *,
+  .post-body > ol + *,
+  .post-body > pre + *,
+  .post-body > img + *,
+  .post-body > table + *,
+  .post-body > hr + * {
+    margin-top: 28px;
+  }
+
+  .post-body > h2 {
+    margin-top: 48px;
+  }
+
+  .post-body > h3 {
+    margin-top: 36px;
+  }
+
+  .post-body > p:first-child::first-letter {
+    float: left;
+    font-size: 4.6rem;
+    line-height: 0.8;
+    font-weight: 900;
+    margin: 8px 14px 0 0;
+  }
+
+  .post-body h2 {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    border-top: var(--border-w) solid var(--ink);
+    padding-top: 24px;
+  }
+
+  .post-body hr + h2 {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .post-body h3 {
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .post-body blockquote {
+    padding: 24px 24px 24px 34px;
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    box-shadow:
+      inset 10px 0 0 0 var(--red),
+      6px 6px 0 0 var(--shadow-c);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .post-body blockquote p {
+    margin: 0;
+  }
+
+  .post-body ul,
+  .post-body ol {
+    padding-left: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .post-body ul {
+    list-style: square;
+  }
+
+  .post-body a {
+    color: var(--red);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .post-body a:hover {
+    background: var(--red);
+    color: var(--on-red);
+    text-decoration: none;
+  }
+
+  .post-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 2px solid var(--ink);
+  }
+
+  .post-body hr {
+    border: none;
+    height: 10px;
+    border-block: 2px solid var(--ink);
+    background: repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 8px);
+  }
+
+  .post-body table {
+    width: 100%;
+    border: 2px solid var(--ink);
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  .post-body th {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: left;
+    background: var(--faint);
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .post-body td {
+    padding: 10px 12px;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .post-body :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    background: var(--faint);
+    padding: 2px 8px;
+  }
+
+  .post-body .code-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .post-body .code-copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 78px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    padding: 4px 10px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 0 var(--shadow-c);
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .post-body .code-copy-btn:hover {
+    background: var(--ink);
+    color: var(--on-ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
+  }
+
+  .post-body .code-copy-btn.copied {
+    background: var(--red);
+    color: var(--on-red);
+    border-color: var(--ink);
+    box-shadow: none;
+    transform: translate(2px, 2px);
+  }
+
+  .post-body pre {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    background: var(--bg) !important;
+    border: var(--border-w) solid var(--ink);
+    padding: 20px 84px 20px 24px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink) transparent;
+  }
+
+  [data-theme='dark'] .post-body pre,
+  [data-theme='dark'] .post-body pre span {
+    color: var(--shiki-dark) !important;
+  }
+
+  .post-body pre::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .post-body pre::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .post-body pre::-webkit-scrollbar-thumb {
+    background: var(--ink);
+  }
+
+  .post-body pre::-webkit-scrollbar-thumb:hover {
+    background: var(--red);
+  }
+
+  .post-body .katex-display {
+    margin: 28px 0 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0;
+  }
+</style>
