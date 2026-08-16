@@ -671,6 +671,16 @@ h1, h2, h3, h4 {
   border-color: var(--on-ink);
 }
 
+/* 字数槽：细边框弱化，与标签区分 */
+.post-row-words {
+  padding: 2px 8px;
+  border: 1px solid var(--faint);
+}
+
+.post-row:hover .post-row-words {
+  border-color: var(--on-ink);
+}
+
 @media (min-width: 768px) {
   .post-row {
     grid-template-columns: 80px 1fr auto;

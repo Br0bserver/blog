@@ -1,0 +1,142 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostRow from '../components/PostRow.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const total = String(posts.length).padStart(3, '0');
+// 字数占位：接入真实统计前先固定演示值
+const wordsPlaceholder = [1204, 892, 2150, 1020, 800, 640];
+---
+
+<BaseLayout title="POSTS — INDEX">
+  <div class="page">
+    <div class="measure-ruler" aria-hidden="true">
+      <span>0mm</span>
+      <span>1240px</span>
+    </div>
+
+    <!-- 页头 -->
+    <header class="posts-head">
+      <div class="posts-head-main">
+        <span class="posts-chip">01 / POSTS</span>
+        <h1 class="posts-title">INDEX</h1>
+        <p class="posts-desc">
+          A complete index of thoughts on design systems, grid discipline, and
+          neo-brutalist raw energy.
+        </p>
+      </div>
+      <div class="total-box" aria-label={`共 ${posts.length} 篇文章`}>
+        <span class="total-label">TOTAL ARTICLES</span>
+        <span class="total-no">{total}</span>
+      </div>
+    </header>
+
+    <div class="sec-divider" aria-hidden="true">
+      <div class="sec-divider-label tilt-pos">SEC_01</div>
+    </div>
+
+    <section class="posts-list">
+      {
+        posts.map((post, i) => (
+          <PostRow
+            post={post}
+            index={i + 1}
+            allTags
+            words={wordsPlaceholder[i] ?? 0}
+          />
+        ))
+      }
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .posts-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gutter);
+    align-items: end;
+    margin-bottom: 64px;
+  }
+
+  .posts-head-main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .posts-chip {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--on-ink);
+    background: var(--ink);
+    padding: 2px 12px;
+    width: max-content;
+  }
+
+  .posts-title {
+    font-size: clamp(56px, 9vw, 96px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    overflow-wrap: break-words;
+  }
+
+  .posts-desc {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--meta);
+    max-width: 560px;
+    border-left: 4px solid var(--red);
+    padding-left: 16px;
+  }
+
+  .total-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 200px;
+    padding: 24px 32px;
+    color: var(--on-ink);
+    background: var(--ink);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--red);
+  }
+
+  .total-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--red);
+  }
+
+  .total-no {
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 96px;
+  }
+
+  @media (min-width: 768px) {
+    .posts-head {
+      grid-template-columns: 1fr auto;
+    }
+  }
+</style>

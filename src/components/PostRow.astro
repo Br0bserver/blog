@@ -5,11 +5,18 @@ import { formatDate } from '../lib/format';
 interface Props {
   post: CollectionEntry<'blog'>;
   index: number;
+  /** 字数（目前传占位值） */
+  words?: number;
+  /** 列表页展示全部标签；首页沿用单标签 */
+  allTags?: boolean;
 }
 
-const { post, index } = Astro.props;
+const { post, index, words, allTags = false } = Astro.props;
 const no = String(index).padStart(2, '0');
-const tag = post.data.tags[0]?.toUpperCase() ?? 'POST';
+const tags = (allTags ? post.data.tags : post.data.tags.slice(0, 1)).map((t) =>
+  t.toUpperCase(),
+);
+const fallbackTag = tags.length ? tags : ['POST'];
 ---
 
 <a href={`/posts/${post.id}/`} class="post-row">
@@ -17,10 +24,15 @@ const tag = post.data.tags[0]?.toUpperCase() ?? 'POST';
   <div class="post-row-main">
     <div class="post-row-title">{post.data.title}</div>
     <div class="post-row-meta">
-      <span class="post-row-tag">{tag}</span>
+      {fallbackTag.map((t) => (
+        <span class="post-row-tag">{t}</span>
+      ))}
       <time datetime={post.data.pubDate.toISOString()}>
         {formatDate(post.data.pubDate)}
       </time>
+      {words !== undefined && (
+        <span class="post-row-words">{words.toLocaleString('en-US')} 字</span>
+      )}
     </div>
   </div>
 </a>
