@@ -117,14 +117,44 @@ const pageNums = Array.from({ length: page.lastPage }, (_, i) => i + 1);
         )
       }
     </nav>
+
+    <!-- 首绘前恢复排序状态：HTML 是日期序，若等模块脚本再恢复会闪一下
+         DATE → WORD COUNT。此内联脚本在解析阶段同步执行（与主题反
+         FOUC 同一手法），只处理 ?sort=words 的恢复，点击交互在下方模块脚本 -->
+    <script is:inline>
+      (function () {
+        if (new URLSearchParams(location.search).get('sort') !== 'words') return;
+        var bar = document.querySelector('.sort-bar');
+        var list = document.querySelector('.posts-list');
+        if (!bar || !list) return;
+        bar.querySelectorAll('.sort-btn').forEach(function (b) {
+          var active = b.dataset.sort === 'words';
+          b.classList.toggle('is-active', active);
+          b.setAttribute('aria-pressed', String(active));
+        });
+        Array.from(list.children)
+          .sort(function (a, b) {
+            return Number(b.dataset.words || 0) - Number(a.dataset.words || 0);
+          })
+          .forEach(function (row, i) {
+            list.appendChild(row);
+            var no = row.querySelector('.post-row-no');
+            if (no) no.textContent = String(i + 1).padStart(2, '0');
+          });
+        document.querySelectorAll('a.pager-btn').forEach(function (a) {
+          var path = (a.getAttribute('href') || '').split('?')[0];
+          if (path) a.setAttribute('href', path + '?sort=words');
+        });
+      })();
+    </script>
   </div>
 </BaseLayout>
 
 <script>
-  // 客户端排序：对当前页的行按日期/字数重排，并同步行首编号。
-  // 排序状态放 URL（?sort=words）：翻页链接携带参数，新页加载时恢复，
-  // 可分享、可后退。注意：静态分页下排序只作用于当前页（demo 阶段够用，
-  // 文章多了需改为构建期方案）。
+  // 客户端排序（点击交互）：对当前页的行按日期/字数重排，并同步行首
+  // 编号。排序状态放 URL（?sort=words）：翻页链接携带参数，带参加载的
+  // 恢复由上方内联脚本在首绘前完成。注意：静态分页下排序只作用于当前页
+  // （demo 阶段够用，文章多了需改为构建期方案）。
   const bar = document.querySelector<HTMLElement>('.sort-bar');
   const list = document.querySelector<HTMLElement>('.posts-list');
 
@@ -159,9 +189,6 @@ const pageNums = Array.from({ length: page.lastPage }, (_, i) => i + 1);
       if (!btn) return;
       applySort(btn.dataset.sort === 'words' ? 'words' : 'date', true);
     });
-    // 从 URL 恢复排序状态
-    const saved = new URLSearchParams(location.search).get('sort');
-    if (saved === 'words') applySort('words', false);
   }
 </script>
 
