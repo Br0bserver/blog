@@ -214,6 +214,7 @@ h1, h2, h3, h4 {
   white-space: nowrap;
   color: var(--faint);
   opacity: 0.5;
+  will-change: transform; /* 视差只改 transform，提升为合成层避免逐帧重绘 */
 }
 
 .bg-words span {

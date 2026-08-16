@@ -23,16 +23,22 @@ const edgeText = 'EST. 2026 — SWISS_BRUTAL_DIARY';
 <div class="edge-label" aria-hidden="true">{edgeText}</div>
 
 <script>
-  // 巨字层滚动视差（约 0.78 倍速 = 向下补偿 22% 的滚动量）。
-  // 用 rAF 而非 CSS scroll timeline：部分 WebView 的 timeline 实现
-  // 会冻结整个页面的滚动。
-  const layer = document.querySelector('.bg-words');
-  if (layer && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  // 巨字层滚动视差。RATE = 向下补偿比例，1-RATE 即巨字滚动速度
+  // （0.35 → 0.65 倍速）。rAF 节流 + 被动监听，只改 transform 走合成器。
+  // 用 rAF 而非 CSS scroll timeline：部分 WebView 的 timeline 实现不可靠。
+  const layer = document.querySelector<HTMLElement>('.bg-words');
+  if (layer) {
+    const RATE = 0.35;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     let ticking = false;
+
     const update = () => {
       ticking = false;
-      layer.style.transform = `translateY(${window.scrollY * 0.22}px)`;
+      layer.style.transform = reduced.matches
+        ? ''
+        : `translateY(${window.scrollY * RATE}px)`;
     };
+
     window.addEventListener(
       'scroll',
       () => {
@@ -43,6 +49,7 @@ const edgeText = 'EST. 2026 — SWISS_BRUTAL_DIARY';
       },
       { passive: true },
     );
+    reduced.addEventListener?.('change', update);
     update();
   }
 </script>
