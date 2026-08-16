@@ -1,0 +1,181 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const externalLinks = [
+  { label: 'GITHUB', href: '#' },
+  { label: 'EMAIL', href: '#' },
+];
+---
+
+<BaseLayout title="ABOUT — BRUTALIST_BLOG">
+  <div class="page">
+    <div class="measure-ruler" aria-hidden="true">
+      <span>0mm</span>
+      <span>1240px</span>
+    </div>
+
+    <header class="about-head">
+      <span class="about-chip">03 / ABOUT</span>
+      <h1 class="about-title">ABOUT_ME</h1>
+    </header>
+
+    <section class="about-grid" aria-label="关于我">
+      <article class="profile-card">
+        <p class="profile-lead">
+          你好，我是这个博客的作者。这里记录设计系统、前端开发，以及一些尚未成形的想法。
+        </p>
+      </article>
+
+      <aside class="links-card">
+        <h2 class="links-title">EXTERNAL_LINKS</h2>
+        <div class="links-list">
+          {
+            externalLinks.map((link) => (
+              <a class="external-link" href={link.href}>
+                <span>{link.label}</span>
+                <span class="link-arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </aside>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 64px;
+  }
+
+  .about-chip {
+    width: max-content;
+    padding: 2px 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--on-ink);
+    background: var(--ink);
+  }
+
+  .about-title {
+    max-width: 100%;
+    font-size: clamp(56px, 10vw, 112px);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    overflow-wrap: break-word;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+
+  .profile-card,
+  .links-card {
+    min-width: 0;
+    padding: 32px;
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--shadow-c);
+  }
+
+  .profile-card {
+    min-height: 280px;
+  }
+
+  .profile-lead {
+    max-width: 34em;
+    margin: 0;
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 800;
+    line-height: 1.45;
+  }
+
+  .links-title {
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    font-size: 20px;
+    border-bottom: var(--border-w) solid var(--ink);
+  }
+
+  .links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .external-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
+    text-decoration: none;
+    transition:
+      color 0.15s ease,
+      background 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .external-link:hover {
+    color: var(--on-red);
+    background: var(--red);
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 0 var(--shadow-c);
+  }
+
+  .external-link:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+  }
+
+  .link-arrow {
+    font-size: 18px;
+    line-height: 1;
+    transition: transform 0.15s ease;
+  }
+
+  .external-link:hover .link-arrow {
+    transform: translate(2px, -2px);
+  }
+
+  @media (min-width: 900px) {
+    .about-grid {
+      grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+      gap: var(--gutter);
+    }
+  }
+
+  @media (max-width: 599px) {
+    .profile-card,
+    .links-card {
+      padding: 24px;
+    }
+
+    .profile-card {
+      min-height: 240px;
+    }
+  }
+</style>
