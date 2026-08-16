@@ -100,19 +100,41 @@ const isActive = (href: string) =>
       }
     ).startViewTransition;
 
+    // 无 VT 能力 / 减速动效：直接切换（@property 令牌过渡负责平滑变色）
     if (matchMedia('(prefers-reduced-motion: reduce)').matches || !startVT) {
-      // 不支持 VT 的浏览器：靠 @property 令牌过渡平滑变色
       apply();
       return;
     }
 
-    if (wiping) return; // 上一次圆形扩散未结束，忽略连点
+    if (wiping) return; // 上一次扩散进行中，忽略连点
     wiping = true;
 
     // VT 快照会冻结颜色过渡的起始帧，切换瞬间先停用令牌过渡，
     // 让圆形边界展开的即是最终配色
     root.style.transition = 'none';
-    const vt = startVT(apply);
+
+    // 兜底清理：finished 在个别环境（隐藏的 webview 等）可能不结算，
+    // 超时强制解锁，保证按钮永远不会卡死
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      root.style.removeProperty('transition');
+      wiping = false;
+    };
+    const failsafe = setTimeout(cleanup, 1000);
+
+    let vt: ViewTransitionLike | null = null;
+    try {
+      vt = startVT(apply);
+    } catch {
+      // VT 存在但调用抛异常（部分 WebView 实现）：退回直接切换，
+      // @property 令牌过渡负责平滑变色
+      clearTimeout(failsafe);
+      cleanup();
+      apply();
+      return;
+    }
 
     vt.ready
       .then(() => {
@@ -141,10 +163,12 @@ const isActive = (href: string) =>
       })
       .catch(() => {});
 
-    vt.finished.finally(() => {
-      root.style.removeProperty('transition');
-      wiping = false;
-    });
+    vt.finished
+      .catch(() => {})
+      .finally(() => {
+        clearTimeout(failsafe);
+        cleanup();
+      });
   });
 
   // 用户手动选择过（localStorage 有值）之前，实时跟随系统亮暗变化
