@@ -297,6 +297,7 @@ h1, h2, h3, h4 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
   max-width: var(--page-max);
   margin-inline: auto;
   height: 80px;
@@ -351,6 +352,7 @@ h1, h2, h3, h4 {
   border-color: var(--ink);
 }
 
+/* 主题切换：状态语言保持单一——悬浮=信号红填充，按下=下沉，点击=图标切换 */
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -360,20 +362,16 @@ h1, h2, h3, h4 {
   background: transparent;
   border: var(--border-w) solid var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
 .theme-toggle:hover {
-  background: var(--ink);
-  color: var(--on-ink);
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0 0 var(--shadow-c);
+  background: var(--red);
+  color: var(--on-red);
 }
 
 .theme-toggle:active {
-  transform: translate(0, 0);
-  box-shadow: none;
+  transform: translateY(2px);
 }
 
 .theme-toggle svg {
