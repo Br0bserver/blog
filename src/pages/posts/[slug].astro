@@ -157,6 +157,38 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
       sync(closed);
     }),
   );
+
+  // 代码块复制按钮动态注入
+  document.querySelectorAll('.post-body pre').forEach((pre) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-wrapper';
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    const btn = document.createElement('button');
+    btn.className = 'code-copy-btn';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', '复制代码');
+    btn.innerHTML = '<span class="copy-text">COPY</span>';
+
+    btn.addEventListener('click', async () => {
+      const code = pre.querySelector('code')?.innerText || pre.innerText;
+      try {
+        await navigator.clipboard.writeText(code);
+        btn.classList.add('copied');
+        const textSpan = btn.querySelector('.copy-text');
+        if (textSpan) textSpan.textContent = 'COPIED!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          if (textSpan) textSpan.textContent = 'COPY';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+      }
+    });
+
+    wrapper.appendChild(btn);
+  });
 </script>
 
 <style>
@@ -553,6 +585,50 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     padding: 2px 8px;
   }
 
+  /* 代码块容器与复制按钮（瑞士粗野风） */
+  .post-body .code-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .post-body .code-copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 78px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    padding: 4px 10px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 0 var(--shadow-c);
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease,
+      box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .post-body .code-copy-btn:hover {
+    background: var(--ink);
+    color: var(--on-ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
+  }
+
+  .post-body .code-copy-btn.copied {
+    background: var(--red);
+    color: var(--on-red);
+    border-color: var(--ink);
+    box-shadow: none;
+    transform: translate(2px, 2px);
+  }
+
   /* 代码块：衬底色块 + 墨框 + 横向滚动，配色交给 shiki；
      暗色下切换到 --shiki-dark 变量（背景强制走令牌） */
   .post-body pre {
@@ -561,7 +637,7 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     line-height: 1.7;
     background: var(--bg) !important;
     border: var(--border-w) solid var(--ink);
-    padding: 20px 24px;
+    padding: 20px 84px 20px 24px;
     overflow-x: auto;
   }
 
