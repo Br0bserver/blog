@@ -547,4 +547,21 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     background: var(--faint);
     padding: 2px 8px;
   }
+
+  /* 代码块：衬底色块 + 墨框 + 横向滚动，配色交给 shiki；
+     暗色下切换到 --shiki-dark 变量（背景强制走令牌） */
+  .post-body pre {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    background: var(--bg) !important;
+    border: var(--border-w) solid var(--ink);
+    padding: 20px 24px;
+    overflow-x: auto;
+  }
+
+  [data-theme='dark'] .post-body pre,
+  [data-theme='dark'] .post-body pre span {
+    color: var(--shiki-dark) !important;
+  }
 </style>

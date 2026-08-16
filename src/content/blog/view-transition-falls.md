@@ -8,3 +8,9 @@ tags: ['CSS', '工程']
 > 占位文章：正文待补。
 
 ## 永远要有 skipTransition 的退路
+
+```js
+// 必须绑定在 document 上调用，解绑调用会抛 Illegal invocation
+const vt = document.startViewTransition(apply);
+vt.finished.catch(() => {}).finally(cleanup);
+```
