@@ -1,0 +1,528 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { sortedPosts } from '../../lib/posts';
+import { formatDate } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const posts = await sortedPosts();
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      prev: posts[i - 1] ?? null, // 更新的一篇
+      next: posts[i + 1] ?? null, // 更早的一篇
+    },
+  }));
+}
+
+const { post, prev, next } = Astro.props;
+const { Content } = await render(post);
+const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400));
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <div class="page">
+    <div class="measure-ruler" aria-hidden="true">
+      <span>0mm</span>
+      <span>1240px</span>
+    </div>
+
+    <!-- 首绘前恢复侧栏开合状态，避免布局跳动 -->
+    <script is:inline>
+      document.documentElement.dataset.postSide =
+        localStorage.getItem('post-sidebar') === 'closed' ? 'closed' : 'open';
+    </script>
+
+    <div class="post-layout">
+      <div class="post-top">
+        <a class="back-link" href="/posts">
+          <span class="back-arrow" aria-hidden="true">‹</span>
+          BACK TO POSTS
+        </a>
+        <button id="side-toggle" class="side-toggle" type="button" aria-expanded="true" aria-controls="post-side">
+          <span class="side-arrow" aria-hidden="true"></span>
+          META
+        </button>
+      </div>
+
+      <aside class="post-side" id="post-side">
+        <div class="meta-card">
+          <div class="meta-row">
+            <span class="meta-label">PUBLISHED</span>
+            <span class="meta-value font-mono">{formatDate(post.data.pubDate)}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">CATEGORY</span>
+            <span class="meta-value">{post.data.tags[0]?.toUpperCase() ?? 'POST'}</span>
+          </div>
+          <div class="meta-row meta-row-last">
+            <span class="meta-label">READ TIME</span>
+            <span class="meta-value font-mono">{minutes} MIN</span>
+          </div>
+        </div>
+        <div class="side-tags">
+          {post.data.tags.map((t) => <span class="side-tag">{t.toUpperCase()}</span>)}
+        </div>
+      </aside>
+
+      <article class="post-main">
+        <header class="post-header">
+          <h1 class="post-title">{post.data.title}</h1>
+        </header>
+
+        <div class="post-body">
+          <Content />
+        </div>
+
+        <div class="hatch-divider" aria-hidden="true"></div>
+
+        <div class="author-block">
+          <div class="author-mono" aria-hidden="true">BB</div>
+          <div>
+            <h4 class="author-name">ARCHIVE_EDITOR</h4>
+            <p class="author-bio">
+              记录设计系统、网格纪律与粗野骨架的实验场。EST. 2026。
+            </p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- 上一篇 / 下一篇 -->
+    <section class="pn-section" aria-label="相邻文章">
+      {prev ? (
+        <a class="pn-card" href={`/posts/${prev.id}/`}>
+          <span class="pn-label">‹ PREVIOUS POST</span>
+          <span class="pn-title">{prev.data.title}</span>
+          <span class="pn-fill" aria-hidden="true"></span>
+          <span class="pn-title-invert" aria-hidden="true">{prev.data.title}</span>
+        </a>
+      ) : (
+        <div class="pn-card is-empty">
+          <span class="pn-label">‹ PREVIOUS POST</span>
+          <span class="pn-title">NO MORE POSTS</span>
+        </div>
+      )}
+      {next ? (
+        <a class="pn-card pn-next" href={`/posts/${next.id}/`}>
+          <span class="pn-label">NEXT POST ›</span>
+          <span class="pn-title">{next.data.title}</span>
+          <span class="pn-fill" aria-hidden="true"></span>
+          <span class="pn-title-invert" aria-hidden="true">{next.data.title}</span>
+        </a>
+      ) : (
+        <div class="pn-card is-empty pn-next">
+          <span class="pn-label">NEXT POST ›</span>
+          <span class="pn-title">NO MORE POSTS</span>
+        </div>
+      )}
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  // 侧栏收起：状态挂 html[data-post-side]，localStorage 持久化
+  const btn = document.getElementById('side-toggle');
+  const sync = (closed: boolean) =>
+    btn?.setAttribute('aria-expanded', String(!closed));
+  if (btn) {
+    sync(document.documentElement.dataset.postSide === 'closed');
+    btn.addEventListener('click', () => {
+      const closed = document.documentElement.dataset.postSide !== 'closed';
+      document.documentElement.dataset.postSide = closed ? 'closed' : 'open';
+      localStorage.setItem('post-sidebar', closed ? 'closed' : 'open');
+      sync(closed);
+    });
+  }
+</script>
+
+<style>
+  /* ---------- 布局：顶栏 + 侧栏 + 正文 ---------- */
+  .post-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--gutter);
+    align-items: start;
+    margin-bottom: 96px;
+  }
+
+  .post-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--red);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 2px;
+    transition: border-color 0.15s ease;
+  }
+
+  .back-link:hover {
+    border-bottom-color: var(--red);
+  }
+
+  .back-arrow {
+    display: inline-block;
+    margin-right: 8px;
+    transition: transform 0.15s ease;
+  }
+
+  .back-link:hover .back-arrow {
+    transform: translateX(-4px);
+  }
+
+  .side-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .side-toggle:hover {
+    background: var(--ink);
+    color: var(--on-ink);
+  }
+
+  .side-arrow::after {
+    content: '‹';
+  }
+
+  :global(html[data-post-side='closed']) .side-arrow::after {
+    content: '›';
+  }
+
+  /* ---------- 侧栏 ---------- */
+  .post-side {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+    overflow: hidden;
+    transition: opacity 0.2s ease;
+  }
+
+  .meta-card {
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    padding: 24px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .meta-row-last {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  .meta-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--meta);
+  }
+
+  .meta-value {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .side-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .side-tag {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    padding: 4px 10px;
+  }
+
+  /* ---------- 正文卡 ---------- */
+  .post-main {
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    padding: 32px;
+    min-width: 0;
+  }
+
+  .post-header {
+    border-bottom: var(--border-w) solid var(--ink);
+    padding-bottom: 32px;
+    margin-bottom: 40px;
+  }
+
+  .post-title {
+    font-size: clamp(36px, 5.5vw, 64px);
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    overflow-wrap: break-words;
+  }
+
+  /* 排版：正文 / 标题 / 引用 / 首字下沉 */
+  .post-body {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    font-size: 17px;
+    line-height: 1.9;
+  }
+
+  .post-body > :global(p:first-of-type)::first-letter {
+    float: left;
+    font-size: 4.6rem;
+    line-height: 0.8;
+    font-weight: 900;
+    margin: 8px 14px 0 0;
+  }
+
+  .post-body :global(h2) {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    border-top: var(--border-w) solid var(--ink);
+    padding-top: 24px;
+    margin-top: 24px;
+  }
+
+  .post-body :global(h3) {
+    font-size: 20px;
+    font-weight: 800;
+    margin-top: 16px;
+  }
+
+  .post-body :global(blockquote) {
+    margin: 8px 0;
+    padding: 24px;
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    border-left: 10px solid var(--red);
+    box-shadow: 6px 6px 0 0 var(--shadow-c);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .post-body :global(blockquote p) {
+    margin: 0;
+  }
+
+  .post-body :global(ul) {
+    list-style: square;
+    padding-left: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .post-body :global(code) {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    background: var(--faint);
+    padding: 2px 8px;
+  }
+
+  /* 斜纹分隔条 */
+  .hatch-divider {
+    height: 12px;
+    border-block: 2px solid var(--ink);
+    background: repeating-linear-gradient(
+      45deg,
+      var(--ink) 0 2px,
+      transparent 2px 8px
+    );
+    margin: 48px 0;
+  }
+
+  /* 作者块 */
+  .author-block {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border: 2px solid var(--ink);
+    background: var(--bg);
+    padding: 24px;
+  }
+
+  .author-mono {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--ink);
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
+
+  .author-name {
+    font-size: 18px;
+    font-weight: 900;
+    margin: 0 0 8px;
+  }
+
+  .author-bio {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--meta);
+  }
+
+  /* ---------- 上一篇 / 下一篇 ---------- */
+  .pn-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    border-top: var(--border-w) solid var(--ink);
+    padding-top: 48px;
+  }
+
+  .pn-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 16px;
+    min-height: 150px;
+    padding: 24px;
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    text-decoration: none;
+  }
+
+  .pn-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--meta);
+    position: relative;
+    z-index: 2;
+    transition: color 0.2s ease;
+  }
+
+  .pn-title {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--ink);
+    position: relative;
+    z-index: 2;
+    transition: color 0.2s ease;
+  }
+
+  /* hover：墨色块自底部涌起，文字反白 */
+  .pn-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    transform: translateY(100%);
+    transition: transform 0.25s ease-out;
+    z-index: 1;
+  }
+
+  .pn-title-invert {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    right: 24px;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--on-ink);
+    opacity: 0;
+    transition: opacity 0.2s ease 0.08s;
+    z-index: 3;
+  }
+
+  a.pn-card:hover .pn-fill {
+    transform: translateY(0);
+  }
+
+  a.pn-card:hover .pn-title,
+  a.pn-card:hover .pn-label {
+    opacity: 0;
+  }
+
+  a.pn-card:hover .pn-title-invert {
+    opacity: 1;
+  }
+
+  .pn-card.is-empty {
+    opacity: 0.35;
+    box-shadow: none;
+  }
+
+  .pn-next {
+    text-align: right;
+  }
+
+  .pn-next .pn-title-invert {
+    left: auto;
+  }
+
+  /* ---------- 桌面端：侧栏列 + 收起 ---------- */
+  @media (min-width: 900px) {
+    .post-layout {
+      grid-template-columns: 300px minmax(0, 1fr);
+      transition: grid-template-columns 0.3s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .post-top {
+      grid-column: 1 / -1;
+    }
+
+    :global(html[data-post-side='closed']) .post-layout {
+      grid-template-columns: 0px minmax(0, 1fr);
+    }
+
+    :global(html[data-post-side='closed']) .post-side {
+      opacity: 0;
+    }
+
+    .pn-section {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 899px) {
+    :global(html[data-post-side='closed']) .post-side {
+      display: none;
+    }
+  }
+</style>
