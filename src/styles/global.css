@@ -56,7 +56,7 @@
   --faint: #33343c;     /* 比原 #282a31 提高一档，水印对比度稍高 */
   --red: #4a69bd;       /* 深色下强调色 = 工业蓝 */
   --on-red: #e0e0e0;    /* 蓝底上的文字是浅灰而非纯白 */
-  --shadow-c: #000000;
+  --shadow-c: var(--ink); /* 黑影在深底上不可见：遵循浅色版规则，阴影=墨色 → 深色下为浅影 */
   --hairline: rgba(224, 224, 224, 0.2);
   --texture: url('/textures/concrete-wall.png');
 
@@ -379,21 +379,24 @@ h1, h2, h3, h4 {
   box-shadow: 0 0 0 0 var(--shadow-c);
 }
 
-/* 点击反馈：当前图标旋转弹跳一次 */
+/* 点击反馈：图标缩放弹跳——缩小瞬间完成切换，再弹回原位 */
 @keyframes toggle-pop {
   0% {
-    transform: rotate(0deg) scale(1);
+    transform: scale(1);
   }
-  50% {
-    transform: rotate(90deg) scale(0.6);
+  40% {
+    transform: scale(0.4);
+  }
+  70% {
+    transform: scale(1.2);
   }
   100% {
-    transform: rotate(180deg) scale(1);
+    transform: scale(1);
   }
 }
 
 .theme-toggle.icon-pop svg {
-  animation: toggle-pop 0.35s ease;
+  animation: toggle-pop 0.3s ease;
 }
 
 .theme-toggle svg {
