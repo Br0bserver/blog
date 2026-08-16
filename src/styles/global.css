@@ -352,7 +352,8 @@ h1, h2, h3, h4 {
   border-color: var(--ink);
 }
 
-/* 主题切换：整站统一按压模型（悬浮抬起+阴影 → 按下压入）+ 点击图标弹跳 */
+/* 主题切换：navbar 是平面区域，静止时按钮无阴影保持平整；
+   阴影只在交互瞬间存在——悬浮「抬起」时出现，按下「压入」时消失 */
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -361,17 +362,17 @@ h1, h2, h3, h4 {
   color: var(--ink);
   background: transparent;
   border: var(--border-w) solid var(--ink);
-  box-shadow: 4px 4px 0 0 var(--shadow-c);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease,
     box-shadow 0.12s ease;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
   background: var(--red);
   color: var(--on-red);
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 0 var(--shadow-c);
+  box-shadow: 5px 5px 0 0 var(--shadow-c);
 }
 
 .theme-toggle:active {
