@@ -1,154 +1,137 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostRow from '../../components/PostRow.astro';
+import PostRow from './PostRow.astro';
+import { PAGE_SIZE, wordsPlaceholder, type Post } from '../lib/posts';
 
-export async function getStaticPaths({ paginate }) {
-  const posts = (await getCollection('blog')).sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-  );
-  // 每页篇数：常规博客分页尺寸
-  return paginate(posts, { pageSize: 10 });
+interface Props {
+  posts: Post[];
+  currentPage: number;
+  totalPosts: number;
 }
 
-// 字数占位：接入真实统计前先固定演示值
-const wordsPlaceholder: Record<string, number> = {
-  'grid-is-the-soul': 1204,
-  'hard-shadow-geometry': 892,
-  'dark-mode-done-right': 2150,
-  'typography-as-infrastructure': 1020,
-  'border-as-structure': 760,
-  'mono-font-discipline': 645,
-  'red-is-the-only-accent': 930,
-  'paper-texture-notes': 510,
-  'view-transition-falls': 1480,
-  'raf-parallax-lesson': 875,
-  'sticker-grammar': 690,
-  'static-first': 1120,
-};
-
-const { page } = Astro.props;
-const total = String(page.total).padStart(3, '0');
-const pageNums = Array.from({ length: page.lastPage }, (_, i) => i + 1);
+const { posts, currentPage, totalPosts } = Astro.props;
+const totalPages = Math.max(1, Math.ceil(totalPosts / PAGE_SIZE));
+const total = String(totalPosts).padStart(3, '0');
+const pageNums = Array.from({ length: totalPages }, (_, i) => i + 1);
+const pageHref = (n: number) => (n === 1 ? '/posts' : `/posts/page/${n}`);
+const prevHref = currentPage > 1 ? pageHref(currentPage - 1) : null;
+const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
 ---
 
-<BaseLayout title="POSTS — INDEX">
-  <div class="page">
-    <div class="measure-ruler" aria-hidden="true">
-      <span>0mm</span>
-      <span>1240px</span>
-    </div>
-
-    <!-- 页头 -->
-    <header class="posts-head">
-      <div class="posts-head-main">
-        <span class="posts-chip">01 / POSTS</span>
-        <h1 class="posts-title">INDEX</h1>
-        <p class="posts-desc">
-          A complete index of thoughts on design systems, grid discipline, and
-          neo-brutalist raw energy.
-        </p>
-      </div>
-      <div class="total-box" aria-label={`共 ${page.total} 篇文章`}>
-        <span class="total-label">TOTAL ARTICLES</span>
-        <span class="total-no">{total}</span>
-      </div>
-    </header>
-
-    <!-- 排序：日期 / 字数 -->
-    <div class="sort-bar" role="group" aria-label="排序方式">
-      <span class="sort-label">SORT:</span>
-      <button class="sort-btn is-active" data-sort="date" aria-pressed="true">
-        DATE
-      </button>
-      <button class="sort-btn" data-sort="words" aria-pressed="false">
-        WORD COUNT
-      </button>
-    </div>
-
-    <section class="posts-list">
-      {
-        page.data.map((post, i) => (
-          <PostRow
-            post={post}
-            index={i + 1}
-            allTags
-            words={wordsPlaceholder[post.id] ?? 0}
-          />
-        ))
-      }
-    </section>
-
-    <!-- 分页 -->
-    <nav class="pager" aria-label="分页">
-      {
-        page.url.prev ? (
-          <a class="pager-btn" href={page.url.prev}>
-            PREV
-          </a>
-        ) : (
-          <span class="pager-btn is-disabled" aria-disabled="true">
-            PREV
-          </span>
-        )
-      }
-      {
-        pageNums.map((n) =>
-          n === page.currentPage ? (
-            <span class="pager-btn is-active" aria-current="page">
-              {String(n).padStart(2, '0')}
-            </span>
-          ) : (
-            <a class="pager-btn" href={n === 1 ? '/posts' : `/posts/${n}`}>
-              {String(n).padStart(2, '0')}
-            </a>
-          ),
-        )
-      }
-      {
-        page.url.next ? (
-          <a class="pager-btn" href={page.url.next}>
-            NEXT
-          </a>
-        ) : (
-          <span class="pager-btn is-disabled" aria-disabled="true">
-            NEXT
-          </span>
-        )
-      }
-    </nav>
-
-    <!-- 首绘前恢复排序状态：HTML 是日期序，若等模块脚本再恢复会闪一下
-         DATE → WORD COUNT。此内联脚本在解析阶段同步执行（与主题反
-         FOUC 同一手法），只处理 ?sort=words 的恢复，点击交互在下方模块脚本 -->
-    <script is:inline>
-      (function () {
-        if (new URLSearchParams(location.search).get('sort') !== 'words') return;
-        var bar = document.querySelector('.sort-bar');
-        var list = document.querySelector('.posts-list');
-        if (!bar || !list) return;
-        bar.querySelectorAll('.sort-btn').forEach(function (b) {
-          var active = b.dataset.sort === 'words';
-          b.classList.toggle('is-active', active);
-          b.setAttribute('aria-pressed', String(active));
-        });
-        Array.from(list.children)
-          .sort(function (a, b) {
-            return Number(b.dataset.words || 0) - Number(a.dataset.words || 0);
-          })
-          .forEach(function (row, i) {
-            list.appendChild(row);
-            var no = row.querySelector('.post-row-no');
-            if (no) no.textContent = String(i + 1).padStart(2, '0');
-          });
-        document.querySelectorAll('a.pager-btn').forEach(function (a) {
-          var path = (a.getAttribute('href') || '').split('?')[0];
-          if (path) a.setAttribute('href', path + '?sort=words');
-        });
-      })();
-    </script>
+<div class="page">
+  <div class="measure-ruler" aria-hidden="true">
+    <span>0mm</span>
+    <span>1240px</span>
   </div>
-</BaseLayout>
+
+  <!-- 页头 -->
+  <header class="posts-head">
+    <div class="posts-head-main">
+      <span class="posts-chip">01 / POSTS</span>
+      <h1 class="posts-title">INDEX</h1>
+      <p class="posts-desc">
+        A complete index of thoughts on design systems, grid discipline, and
+        neo-brutalist raw energy.
+      </p>
+    </div>
+    <div class="total-box" aria-label={`共 ${totalPosts} 篇文章`}>
+      <span class="total-label">TOTAL ARTICLES</span>
+      <span class="total-no">{total}</span>
+    </div>
+  </header>
+
+  <!-- 排序：日期 / 字数 -->
+  <div class="sort-bar" role="group" aria-label="排序方式">
+    <span class="sort-label">SORT:</span>
+    <button class="sort-btn is-active" data-sort="date" aria-pressed="true">
+      DATE
+    </button>
+    <button class="sort-btn" data-sort="words" aria-pressed="false">
+      WORD COUNT
+    </button>
+  </div>
+
+  <section class="posts-list">
+    {
+      posts.map((post, i) => (
+        <PostRow
+          post={post}
+          index={i + 1}
+          allTags
+          words={wordsPlaceholder[post.id] ?? 0}
+        />
+      ))
+    }
+  </section>
+
+  <!-- 分页 -->
+  <nav class="pager" aria-label="分页">
+    {
+      prevHref ? (
+        <a class="pager-btn" href={prevHref}>
+          PREV
+        </a>
+      ) : (
+        <span class="pager-btn is-disabled" aria-disabled="true">
+          PREV
+        </span>
+      )
+    }
+    {
+      pageNums.map((n) =>
+        n === currentPage ? (
+          <span class="pager-btn is-active" aria-current="page">
+            {String(n).padStart(2, '0')}
+          </span>
+        ) : (
+          <a class="pager-btn" href={pageHref(n)}>
+            {String(n).padStart(2, '0')}
+          </a>
+        ),
+      )
+    }
+    {
+      nextHref ? (
+        <a class="pager-btn" href={nextHref}>
+          NEXT
+        </a>
+      ) : (
+        <span class="pager-btn is-disabled" aria-disabled="true">
+          NEXT
+        </span>
+      )
+    }
+  </nav>
+</div>
+
+<!-- 首绘前恢复排序状态：HTML 是日期序，若等模块脚本再恢复会闪一下
+     DATE → WORD COUNT。此内联脚本在解析阶段同步执行，只处理
+     ?sort=words 的恢复，点击交互在下方模块脚本 -->
+<script is:inline>
+  (function () {
+    if (new URLSearchParams(location.search).get('sort') !== 'words') return;
+    var bar = document.querySelector('.sort-bar');
+    var list = document.querySelector('.posts-list');
+    if (!bar || !list) return;
+    bar.querySelectorAll('.sort-btn').forEach(function (b) {
+      var active = b.dataset.sort === 'words';
+      b.classList.toggle('is-active', active);
+      b.setAttribute('aria-pressed', String(active));
+    });
+    Array.from(list.children)
+      .sort(function (a, b) {
+        return Number(b.dataset.words || 0) - Number(a.dataset.words || 0);
+      })
+      .forEach(function (row, i) {
+        list.appendChild(row);
+        var no = row.querySelector('.post-row-no');
+        if (no) no.textContent = String(i + 1).padStart(2, '0');
+      });
+    document.querySelectorAll('a.pager-btn').forEach(function (a) {
+      var path = (a.getAttribute('href') || '').split('?')[0];
+      if (path) a.setAttribute('href', path + '?sort=words');
+    });
+  })();
+</script>
 
 <script>
   // 客户端排序（点击交互）：对当前页的行按日期/字数重排，并同步行首

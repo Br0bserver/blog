@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostsList from '../../../components/PostsList.astro';
+import { PAGE_SIZE, sortedPosts } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await sortedPosts();
+  const totalPages = Math.ceil(posts.length / PAGE_SIZE);
+  // 第 1 页由 /posts（posts/index.astro）承担，这里只生成第 2 页起
+  return Array.from({ length: totalPages }, (_, i) => i + 1)
+    .filter((n) => n > 1)
+    .map((n) => ({
+      params: { page: String(n) },
+      props: {
+        posts: posts.slice((n - 1) * PAGE_SIZE, n * PAGE_SIZE),
+        currentPage: n,
+        totalPosts: posts.length,
+      },
+    }));
+}
+
+const { posts, currentPage, totalPosts } = Astro.props;
+---
+
+<BaseLayout title={`POSTS — INDEX / ${String(currentPage).padStart(2, '0')}`}>
+  <PostsList posts={posts} currentPage={currentPage} totalPosts={totalPosts} />
+</BaseLayout>
