@@ -359,6 +359,11 @@ const latest = posts.slice(0, 3);
     justify-content: center;
   }
 
+  /* 暗色下反白面板 = 大面积浅灰亮板，同叠纸底层一起降为阴影灰 */
+  :global([data-theme='dark']) .sysinfo-about {
+    background: var(--shadow-c);
+  }
+
   .sysinfo-h-invert {
     align-self: flex-start;
     font-size: 20px;
