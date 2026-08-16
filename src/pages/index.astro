@@ -132,10 +132,12 @@ const latest = posts.slice(0, 3);
     transform: rotate(45deg);
   }
 
-  /* 新深色方案：贴纸用墨色而非强调色 */
+  /* 新深色方案：贴纸用墨色而非强调色；
+     阴影保持黑色——贴纸本体已是浅墨色，浅色阴影会与本体糊在一起 */
   :global([data-theme='dark']) .issue-sticker {
     background: var(--ink);
     color: var(--on-ink);
+    box-shadow: 8px 8px 0 0 #000000;
   }
 
   /* ---------- Hero ---------- */
