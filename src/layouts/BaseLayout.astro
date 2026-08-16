@@ -30,6 +30,12 @@ const {
           saved ??
           (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       })();
+      // 跨页转场模式标记：上一页的分页条点击时写入，此处读出供 CSS
+      // 选择器使用（翻页=列表抽卡，否则=整页推进），读完即清
+      if (sessionStorage.getItem('vt-mode') === 'pager') {
+        document.documentElement.dataset.vt = 'pager';
+        sessionStorage.removeItem('vt-mode');
+      }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

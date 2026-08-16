@@ -840,6 +840,15 @@ h1, h2, h3, h4 {
   z-index: 2;
 }
 
+/* ---------- 跨页导航转场 ---------- */
+/* 同源导航自动获得 View Transition（不支持则瞬切）；
+   具体动作在各页面 is:global 样式块定义：
+   - 进入页 = 硬边推进（新页从目标链接一侧盖入）
+   - posts 翻页 = 仅列表抽卡，页头/分页条原地不动 */
+@view-transition {
+  navigation: auto;
+}
+
 /* ---------- 动效偏好 ---------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -847,5 +856,13 @@ h1, h2, h3, h4 {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* 跨页转场同样禁用（瞬切） */
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
