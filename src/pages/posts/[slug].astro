@@ -314,68 +314,6 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     overflow-wrap: break-words;
   }
 
-  /* 排版：正文 / 标题 / 引用 / 首字下沉 */
-  .post-body {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    font-size: 17px;
-    line-height: 1.9;
-  }
-
-  .post-body > :global(p:first-of-type)::first-letter {
-    float: left;
-    font-size: 4.6rem;
-    line-height: 0.8;
-    font-weight: 900;
-    margin: 8px 14px 0 0;
-  }
-
-  .post-body :global(h2) {
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -0.01em;
-    border-top: var(--border-w) solid var(--ink);
-    padding-top: 24px;
-    margin-top: 24px;
-  }
-
-  .post-body :global(h3) {
-    font-size: 20px;
-    font-weight: 800;
-    margin-top: 16px;
-  }
-
-  .post-body :global(blockquote) {
-    margin: 8px 0;
-    padding: 24px;
-    background: var(--surface);
-    border: var(--border-w) solid var(--ink);
-    border-left: 10px solid var(--red);
-    box-shadow: 6px 6px 0 0 var(--shadow-c);
-    font-size: 17px;
-    font-weight: 700;
-  }
-
-  .post-body :global(blockquote p) {
-    margin: 0;
-  }
-
-  .post-body :global(ul) {
-    list-style: square;
-    padding-left: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .post-body :global(code) {
-    font-family: var(--font-mono);
-    font-size: 15px;
-    background: var(--faint);
-    padding: 2px 8px;
-  }
-
   /* 斜纹分隔条 */
   .hatch-divider {
     height: 12px;
@@ -454,5 +392,159 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
     :global(html[data-post-side='closed']) .post-side {
       display: none;
     }
+  }
+</style>
+
+<style is:global>
+  /* ---------- 正文排版系统（markdown 渲染适配） ----------
+     .post-body 仅本页使用；markdown 产出的元素不带作用域属性，
+     故整段用全局样式 + .post-body 前缀限定。
+     限宽 + 分级节奏间距 + 富元素（链接/表格/图片/分割线/代码块） */
+  .post-body {
+    font-size: 17px;
+    line-height: 1.9;
+    max-width: 720px;
+  }
+
+  /* 节奏：段落紧、块级元素中距、标题前大间隔（首块无上边距） */
+  .post-body > * + * {
+    margin-top: 20px;
+  }
+
+  .post-body > blockquote + *,
+  .post-body > ul + *,
+  .post-body > ol + *,
+  .post-body > pre + *,
+  .post-body > img + *,
+  .post-body > table + *,
+  .post-body > hr + * {
+    margin-top: 28px;
+  }
+
+  .post-body > h2 {
+    margin-top: 48px;
+  }
+
+  .post-body > h3 {
+    margin-top: 36px;
+  }
+
+  /* 首字下沉：仅当首块是段落时生效（引用开头的占位文自然跳过） */
+  .post-body > p:first-child::first-letter {
+    float: left;
+    font-size: 4.6rem;
+    line-height: 0.8;
+    font-weight: 900;
+    margin: 8px 14px 0 0;
+  }
+
+  .post-body h2 {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    border-top: var(--border-w) solid var(--ink);
+    padding-top: 24px;
+  }
+
+  .post-body h3 {
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .post-body blockquote {
+    padding: 24px;
+    background: var(--surface);
+    border: var(--border-w) solid var(--ink);
+    border-left: 10px solid var(--red);
+    box-shadow: 6px 6px 0 0 var(--shadow-c);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .post-body blockquote p {
+    margin: 0;
+  }
+
+  .post-body ul {
+    list-style: square;
+    padding-left: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .post-body ol {
+    padding-left: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* 正文链接：信号红 + 偏移下划线，hover 反白 */
+  .post-body a {
+    color: var(--red);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .post-body a:hover {
+    background: var(--red);
+    color: var(--on-red);
+    text-decoration: none;
+  }
+
+  /* 图片：约束宽度 + 墨框 */
+  .post-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 2px solid var(--ink);
+  }
+
+  /* 分割线：小号斜纹条 */
+  .post-body hr {
+    border: none;
+    height: 10px;
+    border-block: 2px solid var(--ink);
+    background: repeating-linear-gradient(
+      45deg,
+      var(--ink) 0 2px,
+      transparent 2px 8px
+    );
+  }
+
+  /* 表格：mono 表头 + 细线网格 */
+  .post-body table {
+    width: 100%;
+    border: 2px solid var(--ink);
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  .post-body th {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: left;
+    background: var(--faint);
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .post-body td {
+    padding: 10px 12px;
+    border-top: 1px solid var(--hairline);
+  }
+
+  /* 行内 code：chip 样式，不污染代码块 */
+  .post-body :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    background: var(--faint);
+    padding: 2px 8px;
   }
 </style>
