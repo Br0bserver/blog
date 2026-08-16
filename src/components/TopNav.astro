@@ -13,7 +13,6 @@ const isActive = (href: string) =>
 
 <nav class="topnav">
   <div class="topnav-inner">
-    <div class="topnav-terminal" aria-hidden="true"></div>
     <a class="nav-logo" href="/" aria-label="BRUTALIST_BLOG — 返回首页"> BRUTALIST_BLOG </a>
 
     <div class="nav-links">
@@ -98,15 +97,6 @@ const isActive = (href: string) =>
     height: 80px;
     padding-inline: var(--margin);
     position: relative;
-  }
-
-  .topnav-terminal {
-    position: absolute;
-    bottom: -8px;
-    left: 10%;
-    width: 1rem;
-    height: 1rem;
-    background: var(--ink);
   }
 
   .nav-logo {
