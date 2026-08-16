@@ -52,4 +52,40 @@ const edgeText = 'EST. 2026 — SWISS_BRUTAL_DIARY';
     reduced.addEventListener?.('change', update);
     update();
   }
+
+  // 巨字锚点归一化：锚点是文档高度百分比，而字号跟随视口宽度——
+  // 短页面（如 /posts）上词距会被压得比字高还小，显得拥挤。
+  // 运行时读出各词中心，强制相邻词距 ≥ 1.85 倍字高（首页间距约
+  // 1.88 倍，不受影响），再以像素写回。末词若因此被推出文档底部，
+  // 会被 overflow:hidden 裁掉，与首页现状一致。
+  const wordsLayer = document.querySelector<HTMLElement>('.bg-words');
+  const normalize = () => {
+    if (!wordsLayer) return;
+    const spans = Array.from(wordsLayer.querySelectorAll('span'));
+    if (spans.length < 2) return;
+    // 视差平移量（reduced-motion 时为 0）：从层自身当前位置反推
+    const shift = wordsLayer.getBoundingClientRect().top + window.scrollY;
+    const centers = spans.map((s) => {
+      const r = s.getBoundingClientRect();
+      return r.top + window.scrollY - shift + r.height / 2;
+    });
+    const minStep = spans[0].offsetHeight * 1.85;
+    for (let i = 1; i < centers.length; i++) {
+      centers[i] = Math.max(centers[i], centers[i - 1] + minStep);
+    }
+    spans.forEach((s, i) => {
+      // w2 由 translate(-50%,-50%) 中心锚定，top 即中心；其余为顶边锚定
+      const centered = s.classList.contains('w2');
+      const top = centered ? centers[i] : centers[i] - s.offsetHeight / 2;
+      s.style.top = `${top}px`;
+    });
+  };
+
+  let normalizeTimer = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(normalizeTimer);
+    normalizeTimer = window.setTimeout(normalize, 150);
+  });
+  document.fonts?.ready.then(normalize);
+  normalize();
 </script>
