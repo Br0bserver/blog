@@ -363,10 +363,10 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
   .author-block {
     display: flex;
     align-items: center;
-    border: 2px solid var(--ink);
-    border-left: 10px solid var(--red);
+    border: var(--border-w) solid var(--ink);
+    box-shadow: inset 10px 0 0 0 var(--red);
     background: var(--bg);
-    padding: 24px;
+    padding: 24px 24px 24px 34px;
   }
 
   .author-name {
@@ -494,11 +494,10 @@ const minutes = Math.max(1, Math.ceil(post.body.replace(/\s/g, '').length / 400)
   }
 
   .post-body blockquote {
-    padding: 24px;
+    padding: 24px 24px 24px 34px;
     background: var(--surface);
     border: var(--border-w) solid var(--ink);
-    border-left: 10px solid var(--red);
-    box-shadow: 6px 6px 0 0 var(--shadow-c);
+    box-shadow: inset 10px 0 0 0 var(--red), 6px 6px 0 0 var(--shadow-c);
     font-size: 17px;
     font-weight: 700;
   }
