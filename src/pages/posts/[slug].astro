@@ -37,8 +37,14 @@ const { Content } = await render(post);
     </div>
 
     <script is:inline>
-      document.documentElement.dataset.postSide =
-        localStorage.getItem('post-sidebar') === 'closed' ? 'closed' : 'open';
+      (() => {
+        const savedPostSide = localStorage.getItem('post-sidebar');
+        const narrowPostViewport = window.matchMedia('(max-width: 899px)').matches;
+        document.documentElement.dataset.postSide =
+          savedPostSide === 'closed' || (savedPostSide === null && narrowPostViewport)
+            ? 'closed'
+            : 'open';
+      })();
     </script>
 
     <div class="post-layout">
@@ -64,16 +70,30 @@ const { Content } = await render(post);
 </BaseLayout>
 
 <script>
-  const toggle = document.querySelector('.side-toggle');
-  const syncSidebar = (closed: boolean) => toggle?.setAttribute('aria-expanded', String(!closed));
+  const initPostSidebar = () => {
+    const toggle = document.querySelector<HTMLButtonElement>('.side-toggle');
+    if (!toggle || toggle.dataset.sidebarBound === 'true') return;
+    toggle.dataset.sidebarBound = 'true';
 
-  syncSidebar(document.documentElement.dataset.postSide === 'closed');
-  toggle?.addEventListener('click', () => {
-    const closed = document.documentElement.dataset.postSide !== 'closed';
-    document.documentElement.dataset.postSide = closed ? 'closed' : 'open';
-    localStorage.setItem('post-sidebar', closed ? 'closed' : 'open');
-    syncSidebar(closed);
-  });
+    const syncSidebar = (closed: boolean) => toggle.setAttribute('aria-expanded', String(!closed));
+
+    const storedPostSide = localStorage.getItem('post-sidebar');
+    const storedClosed =
+      storedPostSide === 'closed' ||
+      (storedPostSide === null && window.matchMedia('(max-width: 899px)').matches);
+    document.documentElement.dataset.postSide = storedClosed ? 'closed' : 'open';
+    syncSidebar(storedClosed);
+
+    toggle.addEventListener('click', () => {
+      const closed = document.documentElement.dataset.postSide !== 'closed';
+      document.documentElement.dataset.postSide = closed ? 'closed' : 'open';
+      localStorage.setItem('post-sidebar', closed ? 'closed' : 'open');
+      syncSidebar(closed);
+    });
+  };
+
+  initPostSidebar();
+  document.addEventListener('astro:page-load', initPostSidebar);
 </script>
 
 <style>
@@ -165,6 +185,21 @@ const { Content } = await render(post);
     :global(html[data-post-side='closed']) .post-layout {
       grid-template-columns: 0 minmax(0, 1fr);
       gap: 0;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .post-layout {
+      margin-bottom: 64px;
+    }
+
+    .post-top {
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .side-toggle {
+      min-height: 44px;
     }
   }
 </style>

@@ -1,3 +1,9 @@
+@import '@fontsource-variable/archivo/wght.css';
+@import '@fontsource-variable/noto-sans-sc/wght.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource/ibm-plex-mono/700.css';
+
 /* ==========================================================================
    SWISS BRUTALIST GRID — 设计令牌与基础
    复刻自 Stitch 方案，以浅色版为准；深色 = 同构反相
@@ -79,7 +85,7 @@
   --border-w: 4px;
   --border-w-sm: 4px;
 
-  --font-display: 'Archivo', 'Noto Sans SC', sans-serif;
+  --font-display: 'Archivo Variable', 'Noto Sans SC Variable', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   --page-max: 1240px;
@@ -303,6 +309,18 @@ h4 {
   box-shadow: 0 0 0 0 var(--red);
 }
 
+/* 幕布负责跨页动画，关闭 ClientRouter 默认的整页快照过渡。 */
+html.is-navigating::view-transition-group(root),
+html.is-navigating::view-transition-old(root),
+html.is-navigating::view-transition-new(root) {
+  animation: none !important;
+}
+
+html.is-navigating::view-transition-old(root),
+html.is-navigating::view-transition-new(root) {
+  display: none !important;
+}
+
 /* ---------- 主题切换：圆形扩散（同文档 View Transition） ---------- */
 /* 压制默认交叉淡入的规则必须限定在 .vt-theme 下（由切换脚本挂上/摘除），
    否则同样会压制跨页导航转场的快照动画 */
@@ -331,5 +349,50 @@ h4 {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- 移动端节奏 ---------- */
+@media (max-width: 767px) {
+  :root {
+    --gutter: 16px;
+    --margin: 16px;
+  }
+
+  .page {
+    padding-block: 64px;
+  }
+
+  .text-outline {
+    -webkit-text-stroke-width: 2px;
+  }
+
+  .sec-divider {
+    padding-top: 24px;
+    margin-bottom: 24px;
+  }
+
+  .sec-divider-label {
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+
+  .sec-header {
+    max-width: 100%;
+    padding-inline: 10px;
+    font-size: clamp(28px, 8.5vw, 36px);
+    overflow-wrap: anywhere;
+  }
+
+  .btn-primary {
+    min-height: 44px;
+    padding: 12px 20px;
+    box-shadow: 6px 6px 0 0 var(--red);
+  }
+}
+
+@media (max-width: 399px) {
+  .page {
+    padding-block: 56px;
   }
 }

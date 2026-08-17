@@ -73,8 +73,11 @@ const isActive = (href: string) =>
 </nav>
 
 <script>
-  import { initThemeToggle } from '../scripts/themeToggle';
+  import { applyThemePreference, initThemeToggle } from '../scripts/themeToggle';
+
   initThemeToggle();
+  document.addEventListener('astro:after-swap', applyThemePreference);
+  document.addEventListener('astro:page-load', initThemeToggle);
 </script>
 
 <style>
@@ -202,6 +205,59 @@ const isActive = (href: string) =>
   @media (min-width: 768px) {
     .nav-links {
       display: flex;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .topnav-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 40px;
+      gap: 10px 12px;
+      height: auto;
+      min-height: 64px;
+      padding-block: 10px 0;
+    }
+
+    .nav-logo {
+      min-width: 0;
+      width: max-content;
+      max-width: 100%;
+      padding: 6px 10px;
+      overflow: hidden;
+      font-size: 22px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      width: 100%;
+      margin: 0;
+      border-top: 2px solid var(--ink);
+    }
+
+    .nav-link {
+      min-width: 0;
+      min-height: 36px;
+      padding: 6px 4px;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .theme-toggle {
+      grid-row: 1;
+      grid-column: 2;
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .nav-logo {
+      font-size: 20px;
     }
   }
 </style>

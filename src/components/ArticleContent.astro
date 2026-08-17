@@ -26,36 +26,43 @@ const { title } = Astro.props;
 </article>
 
 <script>
-  document.querySelectorAll<HTMLElement>('.post-body pre').forEach((pre) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'code-wrapper';
-    pre.parentNode?.insertBefore(wrapper, pre);
-    wrapper.appendChild(pre);
+  const initCodeCopy = () => {
+    document.querySelectorAll<HTMLElement>('.post-body pre').forEach((pre) => {
+      if (pre.parentElement?.classList.contains('code-wrapper')) return;
 
-    const button = document.createElement('button');
-    button.className = 'code-copy-btn';
-    button.type = 'button';
-    button.setAttribute('aria-label', '复制代码');
-    button.innerHTML = '<span class="copy-text">COPY</span>';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-wrapper';
+      pre.parentNode?.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
 
-    button.addEventListener('click', async () => {
-      const code = pre.querySelector<HTMLElement>('code')?.innerText || pre.innerText;
-      try {
-        await navigator.clipboard.writeText(code);
-        button.classList.add('copied');
-        const label = button.querySelector('.copy-text');
-        if (label) label.textContent = 'COPIED!';
-        setTimeout(() => {
-          button.classList.remove('copied');
-          if (label) label.textContent = 'COPY';
-        }, 2000);
-      } catch (error) {
-        console.error('Failed to copy: ', error);
-      }
+      const button = document.createElement('button');
+      button.className = 'code-copy-btn';
+      button.type = 'button';
+      button.setAttribute('aria-label', '复制代码');
+      button.innerHTML = '<span class="copy-text">COPY</span>';
+
+      button.addEventListener('click', async () => {
+        const code = pre.querySelector<HTMLElement>('code')?.innerText || pre.innerText;
+        try {
+          await navigator.clipboard.writeText(code);
+          button.classList.add('copied');
+          const label = button.querySelector('.copy-text');
+          if (label) label.textContent = 'COPIED!';
+          setTimeout(() => {
+            button.classList.remove('copied');
+            if (label) label.textContent = 'COPY';
+          }, 2000);
+        } catch (error) {
+          console.error('Failed to copy: ', error);
+        }
+      });
+
+      wrapper.appendChild(button);
     });
+  };
 
-    wrapper.appendChild(button);
-  });
+  initCodeCopy();
+  document.addEventListener('astro:page-load', initCodeCopy);
 </script>
 
 <style>
@@ -108,6 +115,40 @@ const { title } = Astro.props;
     font-size: 13px;
     line-height: 1.7;
     color: var(--meta);
+  }
+
+  @media (max-width: 767px) {
+    .post-main {
+      padding: 20px;
+      box-shadow: 6px 6px 0 0 var(--shadow-c);
+    }
+
+    .post-header {
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+    }
+
+    .post-title {
+      font-size: clamp(28px, 9vw, 36px);
+      overflow-wrap: anywhere;
+    }
+
+    .hatch-divider {
+      margin-block: 32px;
+    }
+
+    .author-block {
+      padding: 20px 16px 20px 28px;
+      box-shadow: inset 8px 0 0 0 var(--red);
+    }
+
+    .author-name {
+      font-size: 16px;
+    }
+
+    .author-bio {
+      font-size: 12px;
+    }
   }
 </style>
 
@@ -338,5 +379,65 @@ const { title } = Astro.props;
     overflow-x: auto;
     overflow-y: hidden;
     padding: 4px 0;
+  }
+
+  @media (max-width: 767px) {
+    .post-body {
+      font-size: 16px;
+      line-height: 1.85;
+    }
+
+    .post-body > h2 {
+      margin-top: 40px;
+    }
+
+    .post-body > h3 {
+      margin-top: 30px;
+    }
+
+    .post-body > p:first-child::first-letter {
+      font-size: 3.8rem;
+      margin-right: 10px;
+    }
+
+    .post-body h2 {
+      padding-top: 20px;
+      font-size: 23px;
+    }
+
+    .post-body h3 {
+      font-size: 19px;
+    }
+
+    .post-body blockquote {
+      padding: 20px 16px 20px 28px;
+      box-shadow:
+        inset 8px 0 0 0 var(--red),
+        5px 5px 0 0 var(--shadow-c);
+      font-size: 16px;
+    }
+
+    .post-body ul,
+    .post-body ol {
+      padding-left: 22px;
+    }
+
+    .post-body table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .post-body .code-copy-btn {
+      top: 10px;
+      right: 10px;
+      min-width: 68px;
+      font-size: 10px;
+    }
+
+    .post-body pre {
+      padding: 52px 16px 16px;
+      font-size: 13px;
+    }
   }
 </style>

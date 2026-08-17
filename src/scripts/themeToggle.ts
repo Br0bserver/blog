@@ -8,13 +8,21 @@ type ViewTransitionDocument = Document & {
   startViewTransition?: (callback: () => void) => ViewTransitionLike;
 };
 
+let wiping = false;
+let viewTransitionUsable = true;
+let systemThemeBound = false;
+
+export function applyThemePreference(): void {
+  const saved = localStorage.getItem('theme');
+  document.documentElement.dataset.theme =
+    saved ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+
 export function initThemeToggle(): void {
   const root = document.documentElement;
   const toggle = document.getElementById('theme-toggle');
-  if (!toggle) return;
-
-  let wiping = false;
-  let viewTransitionUsable = true;
+  if (!toggle || toggle.dataset.themeBound === 'true') return;
+  toggle.dataset.themeBound = 'true';
 
   toggle.addEventListener('click', () => {
     const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -120,9 +128,12 @@ export function initThemeToggle(): void {
       .finally(cleanup);
   });
 
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
-    if (!localStorage.getItem('theme')) {
-      root.dataset.theme = event.matches ? 'dark' : 'light';
-    }
-  });
+  if (!systemThemeBound) {
+    systemThemeBound = true;
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+      if (!localStorage.getItem('theme')) {
+        document.documentElement.dataset.theme = event.matches ? 'dark' : 'light';
+      }
+    });
+  }
 }

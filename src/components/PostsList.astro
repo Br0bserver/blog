@@ -100,28 +100,28 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
   </nav>
 </div>
 
-<!-- 单一脚本同时负责首绘恢复和点击交互。放在列表之后同步执行，
-     可在首绘前完成 ?sort=words 的全量排序与当前页切片。 -->
-<script is:inline>
-  (() => {
-    const root = document.querySelector('[data-posts-page]');
-    const bar = root?.querySelector('.sort-bar');
-    const list = root?.querySelector('.posts-list');
+<script>
+  const initPostsList = () => {
+    const root = document.querySelector<HTMLElement>('[data-posts-page]');
+    const bar = root?.querySelector<HTMLElement>('.sort-bar');
+    const list = root?.querySelector<HTMLElement>('.posts-list');
     if (!root || !bar || !list) return;
+    if (root.dataset.postsBound === 'true') return;
+    root.dataset.postsBound = 'true';
 
-    const page = Number(root.dataset.postsPage);
-    const pageSize = Number(root.dataset.pageSize);
+    const page = Number(root.dataset.postsPage ?? 1);
+    const pageSize = Number(root.dataset.pageSize ?? 1);
 
-    const applySort = (key, updateUrl) => {
-      bar.querySelectorAll('.sort-btn').forEach((button) => {
+    const applySort = (key: 'date' | 'words', updateUrl: boolean) => {
+      bar.querySelectorAll<HTMLButtonElement>('.sort-btn').forEach((button) => {
         const active = button.dataset.sort === key;
         button.classList.toggle('is-active', active);
         button.setAttribute('aria-pressed', String(active));
       });
 
-      const rows = Array.from(list.children).sort(
-        (a, b) => Number(b.dataset[key] || 0) - Number(a.dataset[key] || 0),
-      );
+      const rows = Array.from(list.children)
+        .filter((row): row is HTMLElement => row instanceof HTMLElement)
+        .sort((a, b) => Number(b.dataset[key] ?? 0) - Number(a.dataset[key] ?? 0));
       const pageStart = (page - 1) * pageSize;
       const pageEnd = pageStart + pageSize;
 
@@ -133,8 +133,8 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
       });
 
       const query = key === 'words' ? '?sort=words' : '';
-      if (updateUrl) history.replaceState(null, '', location.pathname + query);
-      root.querySelectorAll('a.pager-btn').forEach((link) => {
+      if (updateUrl) history.replaceState(history.state, '', location.pathname + query);
+      root.querySelectorAll<HTMLAnchorElement>('a.pager-btn').forEach((link) => {
         const path = (link.getAttribute('href') || '').split('?')[0];
         if (path) link.setAttribute('href', path + query);
       });
@@ -145,10 +145,15 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
     applySort(initialSort, false);
 
     bar.addEventListener('click', (event) => {
-      const button = event.target.closest('.sort-btn');
+      const target = event.target;
+      const button =
+        target instanceof Element ? target.closest<HTMLButtonElement>('.sort-btn') : null;
       if (button) applySort(button.dataset.sort === 'words' ? 'words' : 'date', true);
     });
-  })();
+  };
+
+  initPostsList();
+  document.addEventListener('astro:page-load', initPostsList);
 </script>
 
 <style>
@@ -316,6 +321,69 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
   @media (min-width: 768px) {
     .posts-head {
       grid-template-columns: 1fr auto;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .posts-head {
+      margin-bottom: 48px;
+    }
+
+    .posts-title {
+      font-size: clamp(44px, 13vw, 56px);
+    }
+
+    .posts-desc {
+      padding-left: 14px;
+      font-size: 15px;
+    }
+
+    .total-box {
+      width: 100%;
+      min-width: 0;
+      padding: 20px 24px;
+      box-shadow: 6px 6px 0 0 var(--red);
+    }
+
+    .sort-bar {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.35fr);
+      gap: 8px;
+    }
+
+    .sort-label {
+      margin-right: 0;
+    }
+
+    .sort-btn {
+      min-width: 0;
+      min-height: 44px;
+      padding: 6px 8px;
+    }
+
+    .posts-list {
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+
+    .pager {
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 64px;
+    }
+
+    .pager-btn {
+      padding-inline: 10px;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .sort-bar {
+      grid-template-columns: 1fr 1.35fr;
+    }
+
+    .sort-label {
+      grid-column: 1 / -1;
     }
   }
 </style>

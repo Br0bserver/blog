@@ -1,0 +1,115 @@
+<!--
+  双层换页幕布：参考 bfladderbean.me 的 MIT 实现思路，
+  按本站设计令牌与 Astro 生命周期重新实现。
+-->
+<div class="page-curtain" id="page-curtain" aria-hidden="true" transition:persist="page-curtain">
+  <div class="curtain-panel curtain-accent"></div>
+  <div class="curtain-panel curtain-base"></div>
+</div>
+
+<script>
+  const curtain = document.getElementById('page-curtain');
+
+  if (curtain) {
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const COVER_MS = 145;
+    const REVEAL_MS = 170;
+    let cleanupTimer = 0;
+
+    const wait = (duration: number) =>
+      new Promise<void>((resolve) => window.setTimeout(resolve, duration));
+
+    const finishReveal = () => {
+      clearTimeout(cleanupTimer);
+      curtain.removeAttribute('data-state');
+      document.documentElement.classList.remove('is-navigating');
+    };
+
+    const reveal = () => {
+      curtain.dataset.state = 'revealing';
+      cleanupTimer = window.setTimeout(finishReveal, reducedMotion.matches ? 0 : REVEAL_MS);
+    };
+
+    document.addEventListener('astro:before-preparation', (event) => {
+      clearTimeout(cleanupTimer);
+      document.documentElement.classList.add('is-navigating');
+      curtain.dataset.state = 'covering';
+
+      const loadPage = event.loader;
+      const cover = reducedMotion.matches ? Promise.resolve() : wait(COVER_MS);
+
+      event.loader = async () => {
+        try {
+          await Promise.all([loadPage(), cover]);
+        } catch (error) {
+          reveal();
+          throw error;
+        }
+      };
+    });
+
+    document.addEventListener('astro:page-load', () => {
+      if (curtain.dataset.state === 'covering') requestAnimationFrame(reveal);
+    });
+  }
+</script>
+
+<style>
+  .page-curtain {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    visibility: hidden;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .page-curtain[data-state] {
+    visibility: visible;
+  }
+
+  .page-curtain[data-state='covering'] {
+    pointer-events: auto;
+  }
+
+  .curtain-panel {
+    position: absolute;
+    inset: 0;
+    transform: translateY(100%);
+    transition: transform 0.1s cubic-bezier(0.8, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .curtain-accent {
+    z-index: 1;
+    background: var(--red);
+  }
+
+  .curtain-base {
+    z-index: 2;
+    background: var(--bg);
+    transition-delay: 0.04s;
+  }
+
+  .page-curtain[data-state='covering'] .curtain-panel {
+    transform: translateY(0);
+  }
+
+  .page-curtain[data-state='revealing'] .curtain-panel {
+    transform: translateY(-100%);
+  }
+
+  .page-curtain[data-state='revealing'] .curtain-base {
+    transition-delay: 0s;
+  }
+
+  .page-curtain[data-state='revealing'] .curtain-accent {
+    transition-delay: 0.065s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .curtain-panel {
+      transition: none;
+    }
+  }
+</style>

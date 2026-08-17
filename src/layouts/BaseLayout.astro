@@ -2,6 +2,8 @@
 import TopNav from '../components/TopNav.astro';
 import Footer from '../components/Footer.astro';
 import BackgroundLayer from '../components/BackgroundLayer.astro';
+import PageCurtain from '../components/PageCurtain.astro';
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
 interface Props {
@@ -28,14 +30,10 @@ const { title, description = 'SWISS BRUTALIST GRID — 瑞士秩序 × 粗野骨
           saved ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800;900&family=IBM+Plex+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
+    <ClientRouter fallback="swap" />
   </head>
   <body>
+    <PageCurtain />
     <BackgroundLayer />
     <TopNav />
     <main>
