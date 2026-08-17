@@ -103,4 +103,26 @@ const year = new Date().getFullYear();
       align-self: center;
     }
   }
+
+  @media (max-width: 767px) {
+    .site-footer {
+      margin-top: 64px;
+    }
+
+    .footer-inner {
+      gap: 20px;
+      padding-block: 24px;
+    }
+
+    .footer-links {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .footer-link {
+      min-height: 44px;
+      padding: 8px 10px;
+    }
+  }
 </style>

@@ -101,5 +101,18 @@ const { post } = Astro.props;
     :global(html[data-post-side='closed']) .post-side {
       display: none;
     }
+
+    .post-side {
+      gap: 16px;
+    }
+
+    .meta-card {
+      padding: 20px;
+      box-shadow: 6px 6px 0 0 var(--shadow-c);
+    }
+
+    .meta-value {
+      font-size: 16px;
+    }
   }
 </style>

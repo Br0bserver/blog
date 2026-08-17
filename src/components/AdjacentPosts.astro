@@ -24,6 +24,13 @@ const { prev, next } = Astro.props;
     padding-top: 48px;
   }
 
+  @media (max-width: 767px) {
+    .pn-section {
+      gap: 20px;
+      padding-top: 32px;
+    }
+  }
+
   @media (min-width: 900px) {
     .pn-section {
       grid-template-columns: 1fr 1fr;

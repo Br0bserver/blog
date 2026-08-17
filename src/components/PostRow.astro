@@ -61,13 +61,13 @@ const Element = post ? 'a' : 'div';
   .post-row {
     position: relative;
     display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
-    gap: var(--gutter);
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 16px;
     align-items: center;
-    padding: 24px;
+    padding: 18px 16px;
     background: var(--surface);
     border: var(--border-w) solid var(--ink);
-    box-shadow: 8px 8px 0 0 var(--shadow-c);
+    box-shadow: 6px 6px 0 0 var(--shadow-c);
     text-decoration: none;
     overflow: hidden;
     transition:
@@ -102,12 +102,13 @@ const Element = post ? 'a' : 'div';
     align-self: stretch;
     display: flex;
     align-items: center;
-    padding-left: 16px;
+    justify-content: center;
+    padding-left: 0;
     font-family: var(--font-mono);
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 900;
     color: var(--meta);
-    border-right: var(--border-w) solid var(--ink);
+    border-right: 3px solid var(--ink);
     transition:
       color 0.2s ease,
       border-color 0.2s ease;
@@ -123,7 +124,7 @@ const Element = post ? 'a' : 'div';
   }
 
   .post-row-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     line-height: 1.3;
     text-transform: uppercase;
@@ -141,8 +142,8 @@ const Element = post ? 'a' : 'div';
     align-items: center;
     gap: 8px;
     font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.12em;
+    font-size: 11px;
+    letter-spacing: 0.08em;
     color: var(--meta);
   }
 
@@ -151,7 +152,7 @@ const Element = post ? 'a' : 'div';
   }
 
   .post-row-tag {
-    padding: 2px 8px;
+    padding: 2px 6px;
     border: 2px solid var(--ink);
     background: var(--surface);
     color: var(--ink);
@@ -180,11 +181,31 @@ const Element = post ? 'a' : 'div';
   @media (min-width: 768px) {
     .post-row {
       grid-template-columns: 80px minmax(0, 1fr);
+      gap: var(--gutter);
+      padding: 24px;
+      box-shadow: 8px 8px 0 0 var(--shadow-c);
+    }
+
+    .post-row-no {
+      justify-content: flex-start;
+      padding-left: 16px;
+      font-size: 20px;
+      border-right-width: var(--border-w);
+    }
+
+    .post-row-title {
+      font-size: 20px;
     }
 
     .post-row-meta {
       margin-top: 0;
+      font-size: 12px;
+      letter-spacing: 0.12em;
       text-align: right;
+    }
+
+    .post-row-tag {
+      padding-inline: 8px;
     }
   }
 </style>

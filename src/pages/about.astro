@@ -200,13 +200,61 @@ const externalLinks = [
   }
 
   @media (max-width: 599px) {
+    .about-head {
+      margin-bottom: 48px;
+    }
+
+    .about-title {
+      font-size: clamp(42px, 12vw, 52px);
+      white-space: nowrap;
+      overflow-wrap: normal;
+    }
+
+    .about-grid {
+      gap: 24px;
+    }
+
     .profile-card,
     .links-card {
       padding: 24px;
+      box-shadow: 6px 6px 0 0 var(--shadow-c);
     }
 
     .profile-card {
-      min-height: 240px;
+      min-height: 220px;
+    }
+
+    .profile-lead {
+      font-size: 19px;
+    }
+
+    .profile-quote {
+      margin-top: 36px;
+      padding-right: 16px;
+      border-right-width: 4px;
+    }
+
+    .profile-quote blockquote {
+      font-size: 19px;
+    }
+
+    .external-link {
+      min-height: 44px;
+    }
+  }
+
+  @media (max-width: 399px) {
+    .profile-card,
+    .links-card {
+      padding: 20px;
+    }
+
+    .profile-card {
+      min-height: 200px;
+    }
+
+    .links-title {
+      font-size: 18px;
     }
   }
 </style>
