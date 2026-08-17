@@ -1,6 +1,6 @@
 # blog
 
-瑞士平面 × 新粗野主义（Swiss Brutalism）风格的个人博客，基于 [Astro](https://astro.build) 静态构建。
+Br0b 的个人博客，记录代码、设计与尚未完成的想法，基于 [Astro](https://astro.build) 静态构建。
 
 运行环境：Node.js 22.12 或更高版本。
 

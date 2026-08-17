@@ -7,7 +7,7 @@ const posts = await sortedPosts();
 const latest = posts.slice(0, 3);
 ---
 
-<BaseLayout title="SWISS BRUTALIST GRID">
+<BaseLayout title="BR0B_BLOG">
   <div class="page">
     <div class="measure-ruler" aria-hidden="true">
       <span>0mm</span>
@@ -26,17 +26,14 @@ const latest = posts.slice(0, 3);
       </div>
       <div class="hero-main">
         <h1 class="hero-title">
-          <span class="text-outline hero-line">THE GRID IS</span>
-          <span class="hero-line">
-            THE<span class="hero-soul">SOUL</span>
-          </span>
+          <span class="text-outline hero-line">WORDS IN</span>
+          <span class="hero-line">THE <span class="hero-accent">NOISE</span></span>
         </h1>
         <p class="hero-def">
           <span class="hero-def-tag">DEF.</span>
-          A rigorous intersection of
-          <span class="chip chip-tilt-neg">Swiss Modernist</span> precision and Neo-Brutalist <span
-            class="chip chip-tilt-pos">raw energy</span
-          >. Order is the skeleton. Loudness is the personality.
+          A personal archive of code, design, and unfinished ideas.
+          <span class="chip chip-tilt-neg">Structure</span> keeps the words readable.
+          <span class="chip chip-tilt-pos">Noise</span> keeps them mine.
         </p>
       </div>
     </section>
@@ -64,10 +61,10 @@ const latest = posts.slice(0, 3);
       <div class="sec-divider-label tilt-neg">SEC_02</div>
     </div>
 
-    <!-- 02 / SYSTEM_INFO -->
+    <!-- 02 / SITE_STATUS -->
     <section class="section">
       <div class="section-head section-head-indent">
-        <h2 class="sec-header">02 / SYSTEM_INFO</h2>
+        <h2 class="sec-header">02 / SITE_STATUS</h2>
       </div>
 
       <div class="sysinfo">
@@ -76,22 +73,19 @@ const latest = posts.slice(0, 3);
 
         <div class="sysinfo-grid">
           <div class="sysinfo-stats">
-            <h3 class="sysinfo-h">SITE_STATS</h3>
+            <h3 class="sysinfo-h">SITE_STATUS</h3>
             <ul class="stats-list font-mono">
-              <li><span>ARTICLES:</span> <span>{String(posts.length).padStart(3, '0')}</span></li>
-              <li><span>UPTIME:</span> <span>99.9%</span></li>
-              <li><span>SYS.VER:</span> <span>1.0.0</span></li>
-              <li>
-                <span>RENDER:</span>
-                <span class="stats-ok">OK</span>
-              </li>
+              <li><span>POSTS:</span> <span>{String(posts.length).padStart(3, '0')}</span></li>
+              <li><span>STACK:</span> <span>ASTRO</span></li>
+              <li><span>LICENSE:</span> <span>MIT</span></li>
+              <li><span>STATUS:</span> <span class="stats-ok">ONLINE</span></li>
             </ul>
           </div>
           <div class="sysinfo-about">
-            <h3 class="sysinfo-h-invert">ABOUT_SYSTEM</h3>
+            <h3 class="sysinfo-h-invert">ABOUT_THIS_SITE</h3>
             <p class="sysinfo-text">
-              这个日记本存放关于设计系统的想法——那些把功能和原始视觉冲击放在转瞬即逝的潮流之上的想法。它建立在一列不可弯曲的
-              12 列网格上，用来证明：约束不是限制，而是创作自由的地基。
+              一个使用 Astro
+              构建的个人博客，记录代码、设计与尚未完成的想法。这里保持结构，也给噪声留一点位置。
             </p>
           </div>
         </div>
@@ -178,7 +172,7 @@ const latest = posts.slice(0, 3);
     display: block;
   }
 
-  .hero-soul {
+  .hero-accent {
     display: inline-block;
     margin-left: 0.15em;
     padding: 0 8px;
