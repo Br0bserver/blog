@@ -10,36 +10,40 @@ const { post } = Astro.props;
 ---
 
 <aside class="post-side" id="post-side">
-  <div class="meta-card">
-    <div class="meta-row">
-      <span class="meta-label">PUBLISHED</span>
-      <span class="meta-value font-mono">{formatDate(post.data.pubDate)}</span>
+  <div class="post-side-inner">
+    <div class="meta-card">
+      <div class="meta-row">
+        <span class="meta-label">PUBLISHED</span>
+        <span class="meta-value font-mono">{formatDate(post.data.pubDate)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">CATEGORY</span>
+        <span class="meta-value">{post.data.tags[0]?.toUpperCase() ?? 'POST'}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">READ TIME</span>
+        <span class="meta-value font-mono">{readMinutes(post)} MIN</span>
+      </div>
+      <div class="meta-row meta-row-last meta-row-tags">
+        <span class="meta-label">TAGS</span>
+        <div class="side-tags-list">
+          {
+            post.data.tags.map((tag) => (
+              <div class="side-tag-row">
+                <span class="side-tag-hash font-mono">#</span>
+                <span class="side-tag-text font-mono">{tag.toUpperCase()}</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
     </div>
-    <div class="meta-row">
-      <span class="meta-label">CATEGORY</span>
-      <span class="meta-value">{post.data.tags[0]?.toUpperCase() ?? 'POST'}</span>
-    </div>
-    <div class="meta-row meta-row-last">
-      <span class="meta-label">READ TIME</span>
-      <span class="meta-value font-mono">{readMinutes(post)} MIN</span>
-    </div>
-  </div>
-  <div class="side-tags">
-    {post.data.tags.map((tag) => <span class="side-tag">{tag.toUpperCase()}</span>)}
   </div>
 </aside>
 
 <style>
   .post-side {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
     min-width: 0;
-    padding-right: 10px;
-    padding-bottom: 10px;
-    margin-right: -10px;
-    margin-bottom: -10px;
-    transition: opacity 0.2s ease;
   }
 
   .meta-card {
@@ -76,37 +80,88 @@ const { post } = Astro.props;
     font-weight: 700;
   }
 
-  .side-tags {
+  .side-tags-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
   }
 
-  .side-tag {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.12em;
+  .side-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .side-tag-hash {
+    color: var(--link);
+    font-weight: 800;
+    font-size: 13px;
+  }
+
+  .side-tag-text {
     color: var(--ink);
-    background: var(--surface);
-    border: 2px solid var(--ink);
-    padding: 4px 10px;
   }
 
   @media (min-width: 900px) {
+    .post-side {
+      width: 300px;
+      overflow: hidden;
+      padding-right: 12px;
+      padding-bottom: 12px;
+      margin-right: -12px;
+      margin-bottom: -12px;
+      transition:
+        width 0.35s cubic-bezier(0.2, 0, 0, 1),
+        opacity 0.25s ease,
+        visibility 0.35s;
+    }
+
+    .post-side-inner {
+      width: 300px;
+      transition: transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+      transform: translateX(0);
+    }
+
     :global(html[data-post-side='closed']) .post-side {
+      width: 0;
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
     }
+
+    :global(html[data-post-side='closed']) .post-side-inner {
+      transform: translateX(-40px);
+    }
   }
 
   @media (max-width: 899px) {
-    :global(html[data-post-side='closed']) .post-side {
-      display: none;
+    .post-side {
+      display: grid;
+      grid-template-rows: 1fr;
+      opacity: 1;
+      overflow: hidden;
+      transition:
+        grid-template-rows 0.35s cubic-bezier(0.2, 0, 0, 1),
+        opacity 0.25s ease,
+        margin-bottom 0.35s cubic-bezier(0.2, 0, 0, 1);
+      margin-bottom: 24px;
     }
 
-    .post-side {
-      gap: 16px;
+    .post-side-inner {
+      min-height: 0;
+      padding-right: 8px;
+      padding-bottom: 8px;
+    }
+
+    :global(html[data-post-side='closed']) .post-side {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      margin-bottom: 0;
+      pointer-events: none;
     }
 
     .meta-card {
@@ -116,6 +171,13 @@ const { post } = Astro.props;
 
     .meta-value {
       font-size: 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-side,
+    .post-side-inner {
+      transition: none !important;
     }
   }
 </style>

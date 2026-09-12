@@ -189,17 +189,21 @@ const { Content } = await render(post);
   @media (min-width: 900px) {
     .post-layout {
       grid-template-columns: 300px minmax(0, 1fr);
+      gap: var(--gutter);
       transition:
-        grid-template-columns 0.3s cubic-bezier(0.2, 0, 0, 1),
-        gap 0.3s cubic-bezier(0.2, 0, 0, 1);
+        grid-template-columns 0.35s cubic-bezier(0.2, 0, 0, 1),
+        gap 0.35s cubic-bezier(0.2, 0, 0, 1);
     }
 
     .post-top {
       grid-column: 1 / -1;
+      width: 100%;
+      margin-inline: 0;
+      transition: max-width 0.35s cubic-bezier(0.2, 0, 0, 1);
     }
 
     :global(html[data-post-side='closed']) .post-layout {
-      grid-template-columns: 0 minmax(0, 1fr);
+      grid-template-columns: 0px minmax(0, 1fr);
       gap: 0;
     }
 
@@ -208,6 +212,14 @@ const { Content } = await render(post);
       max-width: 920px;
       margin-inline: auto;
       width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-layout,
+    .post-top,
+    :global(.post-main) {
+      transition: none !important;
     }
   }
 
