@@ -68,9 +68,6 @@ const latest = posts.slice(0, 3);
       </div>
 
       <div class="sysinfo">
-        <!-- 叠纸效果的底层卡 -->
-        <div class="sysinfo-backdrop" aria-hidden="true"></div>
-
         <div class="sysinfo-grid">
           <div class="sysinfo-stats">
             <h3 class="sysinfo-h">SITE_STATUS</h3>
@@ -275,28 +272,10 @@ const latest = posts.slice(0, 3);
   }
 
   /* ---------- SYSTEM_INFO ---------- */
-  /* SEC_02 的衬底与硬影统一走专属变量：比边框墨色浅一档。
-     亮色 = 七成墨（与暗色 --shadow-c 同比例），暗色 = --shadow-c。
-     避免亮色下整块纯黑衬底 / 暗色下整块纯墨亮板 */
   .sysinfo {
-    --sec02-slab: #575653;
     position: relative;
     z-index: 1;
     margin-top: 32px;
-  }
-
-  :global([data-theme='dark']) .sysinfo {
-    --sec02-slab: var(--shadow-c);
-  }
-
-  .sysinfo-backdrop {
-    position: absolute;
-    inset: 0;
-    background: var(--sec02-slab);
-    border: var(--border-w) solid var(--sec02-slab);
-    transform: translate(16px, 16px);
-    z-index: 0;
-    display: none;
   }
 
   .sysinfo-grid {
@@ -306,7 +285,7 @@ const latest = posts.slice(0, 3);
     grid-template-columns: 1fr;
     background: var(--surface);
     border: var(--border-w) solid var(--ink);
-    box-shadow: 8px 8px 0 0 var(--sec02-slab);
+    box-shadow: 8px 8px 0 0 var(--shadow-c);
   }
 
   .sysinfo-stats {
@@ -393,10 +372,6 @@ const latest = posts.slice(0, 3);
   }
 
   @media (min-width: 768px) {
-    .sysinfo-backdrop {
-      display: block;
-    }
-
     .sysinfo-grid {
       grid-template-columns: 4fr 8fr;
     }
@@ -474,7 +449,7 @@ const latest = posts.slice(0, 3);
     }
 
     .sysinfo-grid {
-      box-shadow: 6px 6px 0 0 var(--sec02-slab);
+      box-shadow: 6px 6px 0 0 var(--shadow-c);
     }
 
     .sysinfo-stats {
