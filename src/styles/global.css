@@ -233,6 +233,14 @@ h4 {
   margin: 0 8px 2px;
 }
 
+.measure-ruler span:first-child::before {
+  content: '0px';
+}
+
+.measure-ruler span:last-child::before {
+  content: '1240px';
+}
+
 /* 分割线（SEC_01 / SEC_02） */
 .sec-divider {
   display: flex;
