@@ -35,18 +35,6 @@ const { Content } = await render(post);
       <span></span>
       <span></span>
     </div>
-
-    <script is:inline>
-      (() => {
-        const savedPostSide = localStorage.getItem('post-sidebar');
-        const narrowPostViewport = window.matchMedia('(max-width: 899px)').matches;
-        document.documentElement.dataset.postSide =
-          savedPostSide === 'closed' || (savedPostSide === null && narrowPostViewport)
-            ? 'closed'
-            : 'open';
-      })();
-    </script>
-
     <div class="post-layout">
       <div class="post-top">
         <a class="back-link" href="/posts">
