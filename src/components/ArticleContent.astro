@@ -1,9 +1,10 @@
 ---
 interface Props {
   title: string;
+  dropCap?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, dropCap = false } = Astro.props;
 ---
 
 <article class="post-main">
@@ -11,7 +12,7 @@ const { title } = Astro.props;
     <h1 class="post-title">{title}</h1>
   </header>
 
-  <div class="post-body">
+  <div class:list={['post-body', { 'has-drop-cap': dropCap }]}>
     <slot />
   </div>
 
@@ -83,8 +84,8 @@ const { title } = Astro.props;
   .post-title {
     font-size: clamp(36px, 5.5vw, 64px);
     font-weight: 900;
-    line-height: 0.98;
-    letter-spacing: -0.02em;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
     overflow-wrap: break-words;
   }
 
@@ -130,6 +131,7 @@ const { title } = Astro.props;
 
     .post-title {
       font-size: clamp(28px, 9vw, 36px);
+      line-height: 1.2;
       overflow-wrap: anywhere;
     }
 
@@ -180,7 +182,7 @@ const { title } = Astro.props;
     margin-top: 36px;
   }
 
-  .post-body > p:first-child::first-letter {
+  .post-body.has-drop-cap > p:first-child::first-letter {
     float: left;
     font-size: 4.6rem;
     line-height: 0.8;
@@ -207,12 +209,12 @@ const { title } = Astro.props;
   }
 
   .post-body blockquote {
-    padding: 24px 24px 24px 34px;
+    padding: 20px 24px 20px 30px;
     background: var(--surface);
-    border: var(--border-w) solid var(--ink);
+    border: 2px solid var(--ink);
     box-shadow:
-      inset 10px 0 0 0 var(--red),
-      6px 6px 0 0 var(--shadow-c);
+      inset 8px 0 0 0 var(--red),
+      4px 4px 0 0 var(--shadow-c);
     font-size: 17px;
     font-weight: 700;
   }
@@ -234,7 +236,7 @@ const { title } = Astro.props;
   }
 
   .post-body a {
-    color: var(--red);
+    color: var(--link);
     text-decoration: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
@@ -244,8 +246,8 @@ const { title } = Astro.props;
   }
 
   .post-body a:hover {
-    background: var(--red);
-    color: var(--on-red);
+    background: var(--link);
+    color: var(--surface);
     text-decoration: none;
   }
 
@@ -326,11 +328,19 @@ const { title } = Astro.props;
       border-color 0.15s ease;
   }
 
-  .post-body .code-copy-btn:hover {
-    background: var(--ink);
-    color: var(--on-ink);
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 0 var(--shadow-c);
+  @media (hover: hover) {
+    .post-body .code-copy-btn:hover {
+      background: var(--ink);
+      color: var(--on-ink);
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
+  }
+
+  .post-body .code-copy-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+    transition-duration: 0.08s;
   }
 
   .post-body .code-copy-btn.copied {
@@ -338,7 +348,7 @@ const { title } = Astro.props;
     color: var(--on-red);
     border-color: var(--ink);
     box-shadow: none;
-    transform: translate(2px, 2px);
+    transform: translate(3px, 3px);
   }
 
   .post-body pre {
@@ -395,7 +405,7 @@ const { title } = Astro.props;
       margin-top: 30px;
     }
 
-    .post-body > p:first-child::first-letter {
+    .post-body.has-drop-cap > p:first-child::first-letter {
       font-size: 3.8rem;
       margin-right: 10px;
     }
@@ -410,10 +420,10 @@ const { title } = Astro.props;
     }
 
     .post-body blockquote {
-      padding: 20px 16px 20px 28px;
+      padding: 16px 16px 16px 22px;
       box-shadow:
-        inset 8px 0 0 0 var(--red),
-        5px 5px 0 0 var(--shadow-c);
+        inset 6px 0 0 0 var(--red),
+        3px 3px 0 0 var(--shadow-c);
       font-size: 16px;
     }
 

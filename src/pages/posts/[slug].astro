@@ -35,18 +35,6 @@ const { Content } = await render(post);
       <span></span>
       <span></span>
     </div>
-
-    <script is:inline>
-      (() => {
-        const savedPostSide = localStorage.getItem('post-sidebar');
-        const narrowPostViewport = window.matchMedia('(max-width: 899px)').matches;
-        document.documentElement.dataset.postSide =
-          savedPostSide === 'closed' || (savedPostSide === null && narrowPostViewport)
-            ? 'closed'
-            : 'open';
-      })();
-    </script>
-
     <div class="post-layout">
       <div class="post-top">
         <a class="back-link" href="/posts">
@@ -60,7 +48,7 @@ const { Content } = await render(post);
       </div>
 
       <PostMeta post={post} />
-      <ArticleContent title={post.data.title}>
+      <ArticleContent title={post.data.title} dropCap={post.data.dropCap}>
         <Content />
       </ArticleContent>
     </div>
@@ -118,15 +106,18 @@ const { Content } = await render(post);
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.12em;
-    color: var(--red);
+    color: var(--link);
     text-decoration: none;
     border-bottom: 2px solid transparent;
     padding-bottom: 2px;
-    transition: border-color 0.15s ease;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
   }
 
   .back-link:hover {
-    border-bottom-color: var(--red);
+    color: var(--link);
+    border-bottom-color: var(--link);
   }
 
   .back-arrow {
@@ -152,14 +143,27 @@ const { Content } = await render(post);
     border: var(--border-w) solid var(--ink);
     padding: 6px 16px;
     cursor: pointer;
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
     transition:
       background 0.15s ease,
-      color 0.15s ease;
+      color 0.15s ease,
+      transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .side-toggle:hover {
-    background: var(--ink);
-    color: var(--on-ink);
+  @media (hover: hover) {
+    .side-toggle:hover {
+      background: var(--ink);
+      color: var(--on-ink);
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
+  }
+
+  .side-toggle:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--shadow-c);
+    transition-duration: 0.08s;
   }
 
   .side-arrow::after {
@@ -173,18 +177,46 @@ const { Content } = await render(post);
   @media (min-width: 900px) {
     .post-layout {
       grid-template-columns: 300px minmax(0, 1fr);
+      gap: var(--gutter);
       transition:
-        grid-template-columns 0.3s cubic-bezier(0.2, 0, 0, 1),
-        gap 0.3s cubic-bezier(0.2, 0, 0, 1);
+        grid-template-columns 0.35s cubic-bezier(0.2, 0, 0, 1),
+        gap 0.35s cubic-bezier(0.2, 0, 0, 1);
     }
 
     .post-top {
       grid-column: 1 / -1;
+      width: 100%;
+      max-width: 920px;
+      margin-left: 0px;
+      transition: margin-left 0.35s cubic-bezier(0.2, 0, 0, 1);
     }
 
     :global(html[data-post-side='closed']) .post-layout {
-      grid-template-columns: 0 minmax(0, 1fr);
+      grid-template-columns: 0px minmax(0, 1fr);
       gap: 0;
+    }
+
+    :global(html[data-post-side='closed']) .post-top {
+      margin-left: calc((100% - 920px) / 2);
+    }
+
+    :global(.post-main) {
+      max-width: 920px;
+      margin-left: 0px;
+      width: 100%;
+      transition: margin-left 0.35s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    :global(html[data-post-side='closed']) :global(.post-main) {
+      margin-left: calc((100% - 920px) / 2);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-layout,
+    .post-top,
+    :global(.post-main) {
+      transition: none !important;
     }
   }
 
@@ -196,6 +228,13 @@ const { Content } = await render(post);
     .post-top {
       gap: 12px;
       margin-bottom: 8px;
+      margin-left: 0 !important;
+      max-width: none !important;
+    }
+
+    :global(.post-main) {
+      margin-left: 0 !important;
+      max-width: none !important;
     }
 
     .side-toggle {

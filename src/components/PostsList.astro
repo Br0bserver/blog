@@ -98,6 +98,8 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
 </div>
 
 <script>
+  import { cancelCardLanding } from '../scripts/cardLanding';
+
   const initPostsList = () => {
     const root = document.querySelector<HTMLElement>('[data-posts-page]');
     const bar = root?.querySelector<HTMLElement>('.sort-bar');
@@ -110,6 +112,7 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
     const pageSize = Number(root.dataset.pageSize ?? 1);
 
     const applySort = (key: 'date' | 'words', updateUrl: boolean) => {
+      cancelCardLanding();
       bar.querySelectorAll<HTMLButtonElement>('.sort-btn').forEach((button) => {
         const active = button.dataset.sort === key;
         button.classList.toggle('is-active', active);
@@ -250,17 +253,30 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
     letter-spacing: 0.12em;
     color: var(--ink);
     background: var(--surface);
-    border: var(--border-w) solid var(--ink);
+    border: 2px solid var(--ink);
     padding: 6px 16px;
     cursor: pointer;
+    box-shadow: 3px 3px 0 0 var(--shadow-c);
     transition:
       background 0.15s ease,
-      color 0.15s ease;
+      color 0.15s ease,
+      transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .sort-btn:hover {
-    background: var(--red);
-    color: var(--on-red);
+  @media (hover: hover) {
+    .sort-btn:hover {
+      background: var(--red);
+      color: var(--on-red);
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
+  }
+
+  .sort-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+    transition-duration: 0.08s;
   }
 
   .sort-btn.is-active {
@@ -291,19 +307,32 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
     letter-spacing: 0.12em;
     color: var(--ink);
     background: var(--surface);
-    border: var(--border-w) solid var(--ink);
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 0 var(--shadow-c);
     padding: 8px 16px;
     min-width: 40px;
     text-align: center;
     text-decoration: none;
     transition:
       background 0.15s ease,
-      color 0.15s ease;
+      color 0.15s ease,
+      transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  a.pager-btn:hover {
-    background: var(--red);
-    color: var(--on-red);
+  @media (hover: hover) {
+    a.pager-btn:hover {
+      background: var(--red);
+      color: var(--on-red);
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
+  }
+
+  a.pager-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+    transition-duration: 0.08s;
   }
 
   .pager-btn.is-active {
@@ -313,6 +342,7 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
 
   .pager-btn.is-disabled {
     opacity: 0.3;
+    box-shadow: none;
   }
 
   @media (min-width: 768px) {
@@ -323,7 +353,8 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
 
   @media (max-width: 767px) {
     .posts-head {
-      margin-bottom: 48px;
+      margin-bottom: 36px;
+      gap: 20px;
     }
 
     .posts-title {
@@ -336,10 +367,16 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
     }
 
     .total-box {
+      flex-direction: row;
+      justify-content: space-between;
       width: 100%;
       min-width: 0;
-      padding: 20px 24px;
-      box-shadow: 6px 6px 0 0 var(--red);
+      padding: 12px 18px;
+      box-shadow: 4px 4px 0 0 var(--red);
+    }
+
+    .total-no {
+      font-size: 28px;
     }
 
     .sort-bar {
@@ -371,6 +408,10 @@ const nextHref = currentPage < totalPages ? pageHref(currentPage + 1) : null;
 
     .pager-btn {
       padding-inline: 10px;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 

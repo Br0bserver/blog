@@ -9,9 +9,17 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  pageType?: 'home' | 'post' | 'posts' | 'about' | 'default';
 }
 
-const { title, description = 'BR0B_BLOG — code, design, and unfinished ideas.' } = Astro.props;
+const {
+  title,
+  description = 'BR0B_BLOG — code, design, and unfinished ideas.',
+  pageType: pageTypeProp,
+} = Astro.props;
+const pathname = Astro.url.pathname;
+const isPost = pathname.startsWith('/posts/') && !pathname.startsWith('/posts/page/');
+const pageType = pageTypeProp ?? (pathname === '/' ? 'home' : isPost ? 'post' : 'default');
 ---
 
 <!doctype html>
@@ -25,14 +33,40 @@ const { title, description = 'BR0B_BLOG — code, design, and unfinished ideas.'
     <title>{title}</title>
     <script is:inline>
       (() => {
-        const saved = localStorage.getItem('theme');
-        document.documentElement.dataset.theme =
-          saved ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const applyTheme = (doc = document) => {
+          try {
+            const saved = localStorage.getItem('theme');
+            doc.documentElement.dataset.theme =
+              saved ??
+              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          } catch {}
+        };
+        const applyPostSide = (doc = document) => {
+          try {
+            const saved = localStorage.getItem('post-sidebar');
+            const narrow = window.matchMedia('(max-width: 899px)').matches;
+            doc.documentElement.dataset.postSide =
+              saved === 'closed' || (saved === null && narrow) ? 'closed' : 'open';
+          } catch {}
+        };
+
+        applyTheme(document);
+        applyPostSide(document);
+
+        if (!window.__astroThemeAndSideBound) {
+          window.__astroThemeAndSideBound = true;
+          document.addEventListener('astro:before-swap', (e) => {
+            applyTheme(e.newDocument);
+            applyTheme(document);
+            applyPostSide(e.newDocument);
+            applyPostSide(document);
+          });
+        }
       })();
     </script>
     <ClientRouter fallback="swap" />
   </head>
-  <body>
+  <body data-page-type={pageType}>
     <PageCurtain />
     <BackgroundLayer />
     <TopNav />

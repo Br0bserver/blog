@@ -12,6 +12,8 @@ interface Props {
   tags?: string[];
   emptyTitle?: string;
   hidden?: boolean;
+  /** 首页首篇等场景展示一至两行摘要 */
+  showDescription?: boolean;
 }
 
 const {
@@ -22,6 +24,7 @@ const {
   tags: tagsOverride,
   emptyTitle = 'NO MORE POSTS',
   hidden = false,
+  showDescription = false,
 } = Astro.props;
 const no = typeof index === 'number' ? String(index).padStart(2, '0') : index;
 const postTags = post
@@ -42,6 +45,11 @@ const Element = post ? 'a' : 'div';
   <div class="post-row-main">
     <div class="post-row-title">{post?.data.title ?? emptyTitle}</div>
     {
+      showDescription && post?.data.description && (
+        <p class="post-row-desc">{post.data.description}</p>
+      )
+    }
+    {
       post && (
         <div class="post-row-meta">
           {tags.map((tag) => (
@@ -61,41 +69,73 @@ const Element = post ? 'a' : 'div';
   .post-row {
     position: relative;
     display: grid;
-    grid-template-columns: 40px minmax(0, 1fr);
-    gap: 16px;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 14px;
     align-items: center;
-    padding: 18px 16px;
+    padding: 16px 14px;
     background: var(--surface);
     border: var(--border-w) solid var(--ink);
-    box-shadow: 6px 6px 0 0 var(--shadow-c);
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
     text-decoration: none;
     overflow: hidden;
     transition:
-      background 0.2s ease,
-      color 0.2s ease,
-      transform 0.15s ease,
-      box-shadow 0.15s ease;
+      background 0.16s ease,
+      color 0.16s ease,
+      transform 0.16s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.16s cubic-bezier(0.2, 0, 0, 1);
   }
 
   .post-row::before {
     content: '';
     position: absolute;
     inset: 0 auto 0 0;
-    width: 16px;
+    width: 6px;
     background: var(--red);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    transition: transform 0.16s ease;
   }
 
-  .post-row[href]:hover {
-    background: var(--ink);
-    color: var(--on-ink);
+  @media (hover: hover) {
+    .post-row[href]:hover {
+      background: var(--ink);
+      color: var(--on-ink);
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
+
+    .post-row[href]:hover::before {
+      transform: translateX(0);
+    }
+
+    .post-row[href]:hover .post-row-no {
+      color: var(--on-ink);
+      border-right-color: var(--on-ink);
+    }
+
+    .post-row[href]:hover .post-row-desc {
+      color: var(--on-ink);
+      opacity: 0.85;
+    }
+
+    .post-row[href]:hover .post-row-meta {
+      color: var(--on-ink);
+    }
+
+    .post-row[href]:hover .post-row-tag {
+      background: var(--on-ink);
+      color: var(--ink);
+      border-color: var(--on-ink);
+    }
+
+    .post-row[href]:hover .post-row-words {
+      border-color: var(--on-ink);
+    }
+  }
+
+  .post-row[href]:active {
     transform: translate(4px, 4px);
-    box-shadow: 4px 4px 0 0 var(--red);
-  }
-
-  .post-row[href]:hover::before {
-    transform: translateX(0);
+    box-shadow: 0 0 0 0 var(--shadow-c);
+    transition-duration: 0.08s;
   }
 
   .post-row-no {
@@ -105,18 +145,13 @@ const Element = post ? 'a' : 'div';
     justify-content: center;
     padding-left: 0;
     font-family: var(--font-mono);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 900;
     color: var(--meta);
-    border-right: 3px solid var(--ink);
+    border-right: 2px solid var(--ink);
     transition:
-      color 0.2s ease,
-      border-color 0.2s ease;
-  }
-
-  .post-row[href]:hover .post-row-no {
-    color: var(--on-ink);
-    border-right-color: var(--on-ink);
+      color 0.16s ease,
+      border-color 0.16s ease;
   }
 
   .post-row-main {
@@ -128,11 +163,18 @@ const Element = post ? 'a' : 'div';
     font-weight: 700;
     line-height: 1.3;
     text-transform: uppercase;
-    transition: padding-left 0.2s ease;
   }
 
-  .post-row[href]:hover .post-row-title {
-    padding-left: 16px;
+  .post-row-desc {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--meta);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    transition: color 0.16s ease;
   }
 
   .post-row-meta {
@@ -145,10 +187,7 @@ const Element = post ? 'a' : 'div';
     font-size: 11px;
     letter-spacing: 0.08em;
     color: var(--meta);
-  }
-
-  .post-row[href]:hover .post-row-meta {
-    color: var(--on-ink);
+    transition: color 0.16s ease;
   }
 
   .post-row-tag {
@@ -156,21 +195,16 @@ const Element = post ? 'a' : 'div';
     border: 2px solid var(--ink);
     background: var(--surface);
     color: var(--ink);
-  }
-
-  .post-row[href]:hover .post-row-tag {
-    background: var(--on-ink);
-    color: var(--ink);
-    border-color: var(--on-ink);
+    transition:
+      background 0.16s ease,
+      color 0.16s ease,
+      border-color 0.16s ease;
   }
 
   .post-row-words {
     padding: 2px 8px;
     border: 1px solid var(--faint);
-  }
-
-  .post-row[href]:hover .post-row-words {
-    border-color: var(--on-ink);
+    transition: border-color 0.16s ease;
   }
 
   .is-empty {
@@ -180,15 +214,31 @@ const Element = post ? 'a' : 'div';
 
   @media (min-width: 768px) {
     .post-row {
-      grid-template-columns: 80px minmax(0, 1fr);
+      grid-template-columns: 64px minmax(0, 1fr);
       gap: var(--gutter);
-      padding: 24px;
-      box-shadow: 8px 8px 0 0 var(--shadow-c);
+      padding: 20px 24px;
+      box-shadow: 6px 6px 0 0 var(--shadow-c);
+    }
+
+    .post-row::before {
+      width: 8px;
+    }
+
+    @media (hover: hover) {
+      .post-row[href]:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 4px 4px 0 0 var(--shadow-c);
+      }
+    }
+
+    .post-row[href]:active {
+      transform: translate(6px, 6px);
+      box-shadow: 0 0 0 0 var(--shadow-c);
     }
 
     .post-row-no {
       justify-content: flex-start;
-      padding-left: 16px;
+      padding-left: 12px;
       font-size: 20px;
       border-right-width: var(--border-w);
     }

@@ -23,6 +23,7 @@
       clearTimeout(cleanupTimer);
       curtain.removeAttribute('data-state');
       document.documentElement.classList.remove('is-navigating');
+      window.dispatchEvent(new CustomEvent('curtain:finish'));
     };
 
     const reveal = () => {
