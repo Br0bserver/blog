@@ -145,29 +145,32 @@ const isActive = (href: string) =>
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 4px;
+    padding: 6px;
     color: var(--ink);
     background: transparent;
     border: var(--border-w) solid var(--ink);
     cursor: pointer;
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
     transition:
       background 0.15s ease,
       color 0.15s ease,
-      transform 0.12s ease,
-      box-shadow 0.12s ease;
+      transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .theme-toggle:hover,
-  .theme-toggle:focus-visible {
-    background: var(--red);
-    color: var(--on-red);
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 0 var(--shadow-c);
+  @media (hover: hover) {
+    .theme-toggle:hover {
+      background: var(--red);
+      color: var(--on-red);
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
   }
 
   .theme-toggle:active {
-    transform: translate(3px, 3px);
-    box-shadow: none;
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--shadow-c);
+    transition-duration: 0.08s;
   }
 
   @keyframes toggle-pop {
@@ -211,7 +214,7 @@ const isActive = (href: string) =>
   @media (max-width: 767px) {
     .topnav-inner {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 40px;
+      grid-template-columns: minmax(0, 1fr) 44px;
       gap: 10px 12px;
       height: auto;
       min-height: 64px;
@@ -241,7 +244,10 @@ const isActive = (href: string) =>
 
     .nav-link {
       min-width: 0;
-      min-height: 36px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 6px 4px;
       font-size: 11px;
       text-align: center;
@@ -250,8 +256,10 @@ const isActive = (href: string) =>
     .theme-toggle {
       grid-row: 1;
       grid-column: 2;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
     }
   }
 

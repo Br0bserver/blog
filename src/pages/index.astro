@@ -49,7 +49,7 @@ const latest = posts.slice(0, 3);
         <h2 class="sec-header">01 / INDEX</h2>
       </div>
       <div class="post-list">
-        {latest.map((post, i) => <PostRow post={post} index={i + 1} />)}
+        {latest.map((post, i) => <PostRow post={post} index={i + 1} showDescription={i === 0} />)}
       </div>
       <div class="index-more">
         <a class="btn-primary" href="/posts">查看全部</a>
@@ -70,7 +70,7 @@ const latest = posts.slice(0, 3);
       <div class="sysinfo">
         <div class="sysinfo-grid">
           <div class="sysinfo-stats">
-            <h3 class="sysinfo-h">SITE_STATUS</h3>
+            <h3 class="sysinfo-h">METRICS</h3>
             <ul class="stats-list font-mono">
               <li><span>POSTS:</span> <span>{String(posts.length).padStart(3, '0')}</span></li>
               <li><span>STACK:</span> <span>ASTRO</span></li>
@@ -91,6 +91,10 @@ const latest = posts.slice(0, 3);
   </div>
 </BaseLayout>
 
+<script>
+  import '../scripts/cardLanding';
+</script>
+
 <style>
   /* ---------- ISSUE 贴纸 ---------- */
   .issue-sticker {
@@ -110,12 +114,17 @@ const latest = posts.slice(0, 3);
     transform: rotate(12deg);
     border: var(--border-w) solid var(--ink);
     box-shadow: 8px 8px 0 0 var(--shadow-c);
-    transition: transform 0.5s ease;
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1);
     z-index: 20;
   }
 
-  .issue-sticker:hover {
-    transform: rotate(45deg);
+  @media (hover: hover) {
+    .issue-sticker:hover {
+      transform: rotate(16deg) translate(2px, 2px);
+      box-shadow: 6px 6px 0 0 var(--shadow-c);
+    }
   }
 
   /* 新深色方案：贴纸用墨色而非强调色；
@@ -126,13 +135,19 @@ const latest = posts.slice(0, 3);
     box-shadow: 8px 8px 0 0 var(--red);
   }
 
+  @media (hover: hover) {
+    :global([data-theme='dark']) .issue-sticker:hover {
+      box-shadow: 6px 6px 0 0 var(--red);
+    }
+  }
+
   /* ---------- Hero ---------- */
   .hero {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--gutter);
     position: relative;
-    margin-bottom: 96px;
+    margin-bottom: 72px;
   }
 
   .hero-guide {
@@ -238,7 +253,7 @@ const latest = posts.slice(0, 3);
   /* ---------- 区块通用 ---------- */
   .section {
     position: relative;
-    margin-bottom: 96px;
+    margin-bottom: 72px;
   }
 
   .section-head {
@@ -266,7 +281,7 @@ const latest = posts.slice(0, 3);
   }
 
   .index-more {
-    margin-top: 48px;
+    margin-top: 40px;
     display: flex;
     justify-content: flex-end;
   }
@@ -294,10 +309,13 @@ const latest = posts.slice(0, 3);
   }
 
   .sysinfo-h {
-    font-size: 20px;
-    font-weight: 900;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--meta);
     text-transform: uppercase;
-    border-bottom: var(--border-w) solid var(--ink);
+    border-bottom: 2px solid var(--ink);
     padding-bottom: 8px;
     margin-bottom: 24px;
   }
@@ -391,20 +409,23 @@ const latest = posts.slice(0, 3);
       position: relative;
       top: auto;
       right: auto;
-      width: 96px;
-      height: 96px;
-      margin: 0 8px 24px auto;
-      font-size: 22px;
+      width: 80px;
+      height: 80px;
+      margin: 0 0 16px auto;
+      font-size: 18px;
       transform: rotate(8deg);
       box-shadow: 6px 6px 0 0 var(--shadow-c);
     }
 
-    .issue-sticker:hover {
-      transform: rotate(16deg);
+    @media (hover: hover) {
+      .issue-sticker:hover {
+        transform: rotate(12deg) translate(2px, 2px);
+        box-shadow: 4px 4px 0 0 var(--shadow-c);
+      }
     }
 
     .hero {
-      margin-bottom: 64px;
+      margin-bottom: 48px;
     }
 
     .hero-title {
@@ -412,7 +433,7 @@ const latest = posts.slice(0, 3);
     }
 
     .hero-def {
-      margin-top: 28px;
+      margin-top: 24px;
       margin-left: 0;
       padding: 20px;
       font-size: 16px;
@@ -424,7 +445,7 @@ const latest = posts.slice(0, 3);
     }
 
     .section {
-      margin-bottom: 64px;
+      margin-bottom: 48px;
     }
 
     .section-head {

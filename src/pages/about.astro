@@ -166,30 +166,33 @@ const externalLinks = [
     transition:
       color 0.15s ease,
       background 0.15s ease,
-      transform 0.15s ease,
-      box-shadow 0.15s ease;
+      transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .external-link:hover {
-    color: var(--on-red);
-    background: var(--red);
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0 0 var(--shadow-c);
+  @media (hover: hover) {
+    .external-link:hover {
+      color: var(--on-red);
+      background: var(--red);
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
+
+    .external-link:hover .link-arrow {
+      transform: translate(2px, -2px);
+    }
   }
 
   .external-link:active {
     transform: translate(4px, 4px);
-    box-shadow: none;
+    box-shadow: 0 0 0 0 var(--shadow-c);
+    transition-duration: 0.08s;
   }
 
   .link-arrow {
     font-size: 18px;
     line-height: 1;
     transition: transform 0.15s ease;
-  }
-
-  .external-link:hover .link-arrow {
-    transform: translate(2px, -2px);
   }
 
   @media (min-width: 900px) {

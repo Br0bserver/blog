@@ -22,7 +22,7 @@ const year = new Date().getFullYear();
   .site-footer {
     border-top: var(--border-w) solid var(--ink);
     background: var(--surface);
-    margin-top: 96px;
+    margin-top: 72px;
     position: relative;
     z-index: 1;
   }
@@ -62,19 +62,28 @@ const year = new Date().getFullYear();
     color: var(--ink);
     text-decoration: none;
     padding: 8px 16px;
-    border: var(--border-w) solid var(--ink);
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
     transition:
       background 0.15s ease,
       color 0.15s ease,
-      transform 0.15s ease,
-      box-shadow 0.15s ease;
+      transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .footer-link:hover {
-    background: var(--ink);
-    color: var(--on-ink);
-    transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0 0 var(--shadow-c);
+  @media (hover: hover) {
+    .footer-link:hover {
+      background: var(--ink);
+      color: var(--on-ink);
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
+  }
+
+  .footer-link:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--shadow-c);
+    transition-duration: 0.08s;
   }
 
   .footer-copy {
@@ -106,7 +115,7 @@ const year = new Date().getFullYear();
 
   @media (max-width: 767px) {
     .site-footer {
-      margin-top: 64px;
+      margin-top: 48px;
     }
 
     .footer-inner {
