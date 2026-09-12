@@ -406,10 +406,16 @@ const { title, dropCap = false } = Astro.props;
   .post-body .katex-display::-webkit-scrollbar-thumb,
   .post-body pre::-webkit-scrollbar-thumb,
   .post-body table::-webkit-scrollbar-thumb {
-    background: var(--surface);
+    background: var(--faint);
     border: 1.5px solid var(--ink);
     border-radius: 0;
     cursor: grab;
+  }
+
+  [data-theme='dark'] .post-body .katex-display::-webkit-scrollbar-thumb,
+  [data-theme='dark'] .post-body pre::-webkit-scrollbar-thumb,
+  [data-theme='dark'] .post-body table::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ink) 24%, var(--surface));
   }
 
   .post-body .katex-display::-webkit-scrollbar-thumb:hover,
