@@ -437,9 +437,11 @@ html.is-navigating::view-transition-new(root) {
 /* ==========================================================================
    全站机械工业风滚动条 (Custom Brutalist Scrollbar)
    ========================================================================== */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: var(--ink) var(--bg);
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink) var(--bg);
+  }
 }
 
 ::-webkit-scrollbar {

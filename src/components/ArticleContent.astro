@@ -372,12 +372,13 @@ const { title, dropCap = false } = Astro.props;
     color: var(--shiki-dark) !important;
   }
 
-  /* 机械标尺/图纸线轨风格滚动条 (Style B) */
-  .post-body .katex-display,
-  .post-body pre,
-  .post-body table {
-    scrollbar-width: thin;
-    scrollbar-color: var(--ink) transparent;
+  @supports not selector(::-webkit-scrollbar) {
+    .post-body .katex-display,
+    .post-body pre,
+    .post-body table {
+      scrollbar-width: thin;
+      scrollbar-color: var(--ink) transparent;
+    }
   }
 
   .post-body .katex-display::-webkit-scrollbar,
