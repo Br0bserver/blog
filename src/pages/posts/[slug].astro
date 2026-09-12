@@ -60,7 +60,7 @@ const { Content } = await render(post);
       </div>
 
       <PostMeta post={post} />
-      <ArticleContent title={post.data.title}>
+      <ArticleContent title={post.data.title} dropCap={post.data.dropCap}>
         <Content />
       </ArticleContent>
     </div>
@@ -118,15 +118,18 @@ const { Content } = await render(post);
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.12em;
-    color: var(--red);
+    color: var(--link);
     text-decoration: none;
     border-bottom: 2px solid transparent;
     padding-bottom: 2px;
-    transition: border-color 0.15s ease;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
   }
 
   .back-link:hover {
-    border-bottom-color: var(--red);
+    color: var(--link);
+    border-bottom-color: var(--link);
   }
 
   .back-arrow {
@@ -152,14 +155,27 @@ const { Content } = await render(post);
     border: var(--border-w) solid var(--ink);
     padding: 6px 16px;
     cursor: pointer;
+    box-shadow: 4px 4px 0 0 var(--shadow-c);
     transition:
       background 0.15s ease,
-      color 0.15s ease;
+      color 0.15s ease,
+      transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .side-toggle:hover {
-    background: var(--ink);
-    color: var(--on-ink);
+  @media (hover: hover) {
+    .side-toggle:hover {
+      background: var(--ink);
+      color: var(--on-ink);
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--shadow-c);
+    }
+  }
+
+  .side-toggle:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--shadow-c);
+    transition-duration: 0.08s;
   }
 
   .side-arrow::after {
@@ -185,6 +201,13 @@ const { Content } = await render(post);
     :global(html[data-post-side='closed']) .post-layout {
       grid-template-columns: 0 minmax(0, 1fr);
       gap: 0;
+    }
+
+    :global(html[data-post-side='closed']) .post-top,
+    :global(html[data-post-side='closed']) :global(.post-main) {
+      max-width: 920px;
+      margin-inline: auto;
+      width: 100%;
     }
   }
 
