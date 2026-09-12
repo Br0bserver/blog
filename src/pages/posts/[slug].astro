@@ -198,8 +198,9 @@ const { Content } = await render(post);
     .post-top {
       grid-column: 1 / -1;
       width: 100%;
-      margin-inline: 0;
-      transition: max-width 0.35s cubic-bezier(0.2, 0, 0, 1);
+      max-width: 920px;
+      margin-left: 0px;
+      transition: margin-left 0.35s cubic-bezier(0.2, 0, 0, 1);
     }
 
     :global(html[data-post-side='closed']) .post-layout {
@@ -207,11 +208,19 @@ const { Content } = await render(post);
       gap: 0;
     }
 
-    :global(html[data-post-side='closed']) .post-top,
-    :global(html[data-post-side='closed']) :global(.post-main) {
+    :global(html[data-post-side='closed']) .post-top {
+      margin-left: calc((100% - 920px) / 2);
+    }
+
+    :global(.post-main) {
       max-width: 920px;
-      margin-inline: auto;
+      margin-left: 0px;
       width: 100%;
+      transition: margin-left 0.35s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    :global(html[data-post-side='closed']) :global(.post-main) {
+      margin-left: calc((100% - 920px) / 2);
     }
   }
 
@@ -231,6 +240,13 @@ const { Content } = await render(post);
     .post-top {
       gap: 12px;
       margin-bottom: 8px;
+      margin-left: 0 !important;
+      max-width: none !important;
+    }
+
+    :global(.post-main) {
+      margin-left: 0 !important;
+      max-width: none !important;
     }
 
     .side-toggle {
