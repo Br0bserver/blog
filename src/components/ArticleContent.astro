@@ -365,8 +365,6 @@ const { title, dropCap = false } = Astro.props;
     border: var(--border-w) solid var(--ink);
     padding: 20px 84px 20px 24px;
     overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ink) transparent;
   }
 
   [data-theme='dark'] .post-body pre,
@@ -374,27 +372,64 @@ const { title, dropCap = false } = Astro.props;
     color: var(--shiki-dark) !important;
   }
 
-  .post-body pre::-webkit-scrollbar {
+  /* 机械标尺/图纸线轨风格滚动条 (Style B) */
+  .post-body .katex-display,
+  .post-body pre,
+  .post-body table {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink) transparent;
+  }
+
+  .post-body .katex-display::-webkit-scrollbar,
+  .post-body pre::-webkit-scrollbar,
+  .post-body table::-webkit-scrollbar {
     height: 8px;
+    width: 8px;
   }
 
-  .post-body pre::-webkit-scrollbar-track {
+  .post-body .katex-display::-webkit-scrollbar-button,
+  .post-body pre::-webkit-scrollbar-button,
+  .post-body table::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .post-body .katex-display::-webkit-scrollbar-track,
+  .post-body pre::-webkit-scrollbar-track,
+  .post-body table::-webkit-scrollbar-track {
     background: transparent;
+    border-bottom: 1px dashed var(--hairline);
   }
 
-  .post-body pre::-webkit-scrollbar-thumb {
-    background: var(--ink);
+  .post-body .katex-display::-webkit-scrollbar-thumb,
+  .post-body pre::-webkit-scrollbar-thumb,
+  .post-body table::-webkit-scrollbar-thumb {
+    background: var(--surface);
+    border: 1.5px solid var(--ink);
+    border-radius: 0;
+    cursor: grab;
   }
 
-  .post-body pre::-webkit-scrollbar-thumb:hover {
+  .post-body .katex-display::-webkit-scrollbar-thumb:hover,
+  .post-body pre::-webkit-scrollbar-thumb:hover,
+  .post-body table::-webkit-scrollbar-thumb:hover {
     background: var(--red);
+    border-color: var(--ink);
+  }
+
+  .post-body .katex-display::-webkit-scrollbar-thumb:active,
+  .post-body pre::-webkit-scrollbar-thumb:active,
+  .post-body table::-webkit-scrollbar-thumb:active {
+    background: var(--red);
+    cursor: grabbing;
   }
 
   .post-body .katex-display {
-    margin: 28px 0 8px;
+    margin: 28px 0 16px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 4px 0;
+    padding: 4px 0 8px;
   }
 
   @media (max-width: 767px) {

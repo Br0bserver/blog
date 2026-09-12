@@ -433,3 +433,37 @@ html.is-navigating::view-transition-new(root) {
     padding-block: 56px;
   }
 }
+
+/* ==========================================================================
+   全站机械工业风滚动条 (Custom Brutalist Scrollbar)
+   ========================================================================== */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink) var(--bg);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-left: 1px solid var(--hairline);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ink);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background: var(--red);
+}
