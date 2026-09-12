@@ -198,6 +198,24 @@ const edgeText = 'BR0B — PERSONAL BLOG';
     white-space: nowrap;
   }
 
+  /* 暗色沿用同一套纸张点阵，仅提高蓝灰结构层的可见度。 */
+  :global([data-theme='dark']) .bg-grid-dots {
+    opacity: 1;
+  }
+
+  :global([data-theme='dark']) .bg-grid-dots::before {
+    background-image: radial-gradient(rgba(184, 198, 240, 0.08) 2px, transparent 0);
+    opacity: 1;
+  }
+
+  :global([data-theme='dark']) .bg-cols {
+    opacity: 1;
+  }
+
+  :global([data-theme='dark']) .bg-cols > div {
+    border-right-color: rgba(74, 105, 189, 0.18);
+  }
+
   @media (max-width: 767px) {
     .bg-words span {
       font-size: clamp(220px, 78vw, 300px);
