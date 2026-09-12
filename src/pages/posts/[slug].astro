@@ -197,7 +197,7 @@ const { Content } = await render(post);
     }
 
     :global(html[data-post-side='closed']) .post-top {
-      margin-left: calc((100% - 920px) / 2);
+      margin-left: max(0px, calc((100% - 920px) / 2));
     }
 
     :global(.post-main) {
@@ -208,7 +208,7 @@ const { Content } = await render(post);
     }
 
     :global(html[data-post-side='closed']) :global(.post-main) {
-      margin-left: calc((100% - 920px) / 2);
+      margin-left: max(0px, calc((100% - 920px) / 2));
     }
   }
 

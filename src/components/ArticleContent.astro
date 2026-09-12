@@ -188,14 +188,18 @@ const { title, dropCap = false } = Astro.props;
     line-height: 0.8;
     font-weight: 900;
     margin: 8px 14px 0 0;
+    font-family: var(--font-display);
+    color: var(--ink);
   }
 
   .post-body h2 {
     font-size: 26px;
     font-weight: 900;
-    letter-spacing: -0.01em;
-    border-top: var(--border-w) solid var(--ink);
-    padding-top: 24px;
+    letter-spacing: -0.02em;
+    padding-top: 32px;
+    border-top: 3px solid var(--ink);
+    margin-inline: calc(-1 * var(--margin-inside, 36px));
+    padding-inline: var(--margin-inside, 36px);
   }
 
   .post-body hr + h2 {
@@ -209,6 +213,8 @@ const { title, dropCap = false } = Astro.props;
   }
 
   .post-body blockquote {
+    margin-inline: 0;
+    margin-block: 24px;
     padding: 20px 24px 20px 30px;
     background: var(--surface);
     border: 2px solid var(--ink);
@@ -420,6 +426,8 @@ const { title, dropCap = false } = Astro.props;
     }
 
     .post-body blockquote {
+      margin-inline: 0;
+      margin-block: 20px;
       padding: 16px 16px 16px 22px;
       box-shadow:
         inset 6px 0 0 0 var(--red),
