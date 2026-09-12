@@ -56,6 +56,11 @@
   inherits: true;
   initial-value: #ffffff;
 }
+@property --link {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e63312;
+}
 @property --shadow-c {
   syntax: '<color>';
   inherits: true;
@@ -79,8 +84,10 @@
   --shadow-c: var(--ink); /* 硬阴影跟随墨色（浅色=黑影） */
   --red: #e63312;
   --on-red: #ffffff;
+  --link: #e63312;
   --hairline: rgba(16, 16, 16, 0.2);
   --texture: url('/textures/paper-fibers.png');
+  --texture-opacity: 0.6;
 
   --border-w: 4px;
   --border-w-sm: 4px;
@@ -96,19 +103,21 @@
 }
 
 [data-theme='dark'] {
-  /* 新深色方案：石板底 + 工业蓝强调 + 黑影（边框/阴影宽度仍以浅色版为准） */
+  /* 新深色方案：石板底 + 工业蓝强调 + 黑影 */
   --bg: #1a1c23;
-  --surface: #1a1c23;
+  --surface: #22252e; /* 卡片表面色从底板浮现，避免大灰块与背景同色 */
   --ink: #e0e0e0;
   --on-ink: #1a1c23;
-  --meta: #888888;
-  --meta-dim: #888888;
+  --meta: #a0a4b0; /* 调高主要元数据明度，增强辨识度 */
+  --meta-dim: #757985; /* 次要注记保留次级灰阶 */
   --faint: #33343c; /* 比原 #282a31 提高一档，水印对比度稍高 */
   --red: #4a69bd; /* 深色下强调色 = 工业蓝 */
   --on-red: #e0e0e0; /* 蓝底上的文字是浅灰而非纯白 */
-  --shadow-c: #a5a5a7; /* 七成墨色：阴影清晰又不刺眼（纯墨过亮、五成偏暗） */
+  --link: #8fa9ed; /* 高对比度链接蓝（深底/卡片对比度 > 5:1） */
+  --shadow-c: #a5a5a7; /* 七成墨色：阴影清晰又不刺眼 */
   --hairline: rgba(224, 224, 224, 0.2);
   --texture: url('/textures/concrete-wall.png');
+  --texture-opacity: 0.35;
 
   color-scheme: dark;
 }
@@ -133,6 +142,7 @@ html {
     --faint 0.3s ease,
     --red 0.3s ease,
     --on-red 0.3s ease,
+    --link 0.3s ease,
     --shadow-c 0.3s ease,
     --hairline 0.3s ease;
 }
@@ -145,7 +155,6 @@ body {
   line-height: 1.7;
   color: var(--ink);
   background-color: var(--bg);
-  background-image: var(--texture);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -165,7 +174,7 @@ a {
 }
 
 :focus-visible {
-  outline: 3px dashed var(--red);
+  outline: 3px dashed var(--link);
   outline-offset: 2px;
 }
 
@@ -234,11 +243,11 @@ h4 {
 }
 
 .measure-ruler span:first-child::before {
-  content: '0px';
+  content: 'COL_00';
 }
 
 .measure-ruler span:last-child::before {
-  content: '1240px';
+  content: 'COL_12';
 }
 
 /* 分割线（SEC_01 / SEC_02） */
@@ -307,14 +316,22 @@ h4 {
   padding: 16px 32px;
   box-shadow: 8px 8px 0 0 var(--red);
   transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
+    transform 0.16s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.16s cubic-bezier(0.2, 0, 0, 1),
+    background 0.16s ease;
 }
 
-.btn-primary:hover {
+@media (hover: hover) {
+  .btn-primary:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 6px 6px 0 0 var(--red);
+  }
+}
+
+.btn-primary:active {
   transform: translate(8px, 8px);
   box-shadow: 0 0 0 0 var(--red);
+  transition-duration: 0.08s;
 }
 
 /* 幕布负责跨页动画，关闭 ClientRouter 默认的整页快照过渡。 */
@@ -396,6 +413,18 @@ html.is-navigating::view-transition-new(root) {
     min-height: 44px;
     padding: 12px 20px;
     box-shadow: 6px 6px 0 0 var(--red);
+  }
+
+  @media (hover: hover) {
+    .btn-primary:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 4px 4px 0 0 var(--red);
+    }
+  }
+
+  .btn-primary:active {
+    transform: translate(6px, 6px);
+    box-shadow: 0 0 0 0 var(--red);
   }
 }
 
